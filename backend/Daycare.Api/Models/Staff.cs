@@ -8,5 +8,5 @@ public class Staff
     public string PhoneNumber { get; set; } = string.Empty;
     public string Gender { get; set; } = string.Empty;
     public string Position { get; set; } = string.Empty;
-    public DateTime HireDate { get; set; }
+    public DateOnly HireDate { get; set; }
 }
