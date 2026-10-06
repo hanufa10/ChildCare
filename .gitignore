@@ -1,0 +1,27 @@
+# React / Node
+node_modules/
+dist/
+.vite/
+
+# .NET
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# User-specific files
+*.user
+*.suo
+
+# Environment / secrets
+.env
+.env.*
+appsettings.Development.json
+
+# Local database configuration
+backend/Daycare.Api/appsettings.json
+
+# OS files
+.DS_Store
+Thumbs.db
