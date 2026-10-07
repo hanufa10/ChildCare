@@ -224,3 +224,11 @@ tr:hover {
   color: white;
   font-weight: 600;
 }
+
+/*About Us */
+.about-us-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}

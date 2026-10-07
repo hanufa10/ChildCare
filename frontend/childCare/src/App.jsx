@@ -7,6 +7,7 @@ import Parents from './pages/Parents'
 import Staff from './pages/Staff'
 import Meals from './pages/Meals'
 import ParentChildren from './pages/ParentChildren'
+import AboutUs from './pages/AboutUs'
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/staff" element={<Staff />} />
           <Route path="/meals" element={<Meals />} />
           <Route path="/parent-children" element={<ParentChildren />} />
+          <Route path="/aboutus" element={<AboutUs/>}/>
         </Routes>
       </main>
       </BrowserRouter>

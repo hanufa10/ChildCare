@@ -27,6 +27,9 @@ function Sidebar() {
           <li>
             <Link to="/meals">Meals</Link>
           </li>
+          <li>
+            <Link to="/aboutus">About Us</Link>
+          </li>
         </ul>
       </nav>
     </aside>
