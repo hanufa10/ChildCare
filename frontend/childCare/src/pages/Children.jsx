@@ -132,7 +132,7 @@ function Children() {
         )
 
         if (!response.ok) {
-        throw new Error('Failed to delete child')
+        throw new Error('Failed to delete child data')
         }
 
         setChildren(children.filter(child => child.id !== id))
