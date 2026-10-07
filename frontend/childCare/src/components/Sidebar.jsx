@@ -3,7 +3,7 @@ function Sidebar() {
   return (
     <aside>
       <h2>
-        Child <span>Care</span>
+        Day <span>Care</span>
       </h2>
       <nav>
         <ul>
