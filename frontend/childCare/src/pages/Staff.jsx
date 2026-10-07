@@ -167,7 +167,7 @@ function Staff() {
       {showAddForm && (
         <div className="edit-form">
             <h2>Add Staff</h2>
-
+          <div>
             <input
             type="text"
             value={newStaff.firstName}
@@ -249,7 +249,8 @@ function Staff() {
                 })
             }
             />
-
+            </div>
+            <div className="form-buttons">
             <button
             className="save-button"
             onClick={handleAdd}
@@ -263,6 +264,7 @@ function Staff() {
             >
             Cancel
             </button>
+            </div>
         </div>
         )}
         {editingStaff && (
@@ -349,6 +351,7 @@ function Staff() {
             }
             placeholder='Position'
             />
+            <div className="form-buttons">
             <button className="save-button" onClick={handleSave}>
             Save
             </button>
@@ -359,6 +362,7 @@ function Staff() {
             >
             Cancel
             </button>
+            </div>
         </div>
         )}
       <div className="table-container">

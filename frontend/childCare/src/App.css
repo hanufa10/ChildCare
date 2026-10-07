@@ -146,13 +146,24 @@ tr:hover {
   margin-bottom: 25px;
   border-radius: 15px;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+ flex-direction: column;
+  gap: 10px;
 }
-
+.add-form {
+  display: flex;
+  flex-direction: column;
+}
 .edit-form h2 {
   margin-top: 0;
 }
-
-.edit-form input, .edit-form select {
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: end;
+}
+.edit-form input, .edit-form select, .edit-form textarea {
   padding: 10px;
   margin-right: 10px;
   margin-bottom: 10px;
@@ -161,7 +172,8 @@ tr:hover {
 }
 
 .save-button,
-.cancel-button {
+.cancel-button,
+.week-button {
   padding: 10px 18px;
   border: none;
   border-radius: 8px;
@@ -176,4 +188,39 @@ tr:hover {
 
 .cancel-button {
   background-color: #eee;
+}
+
+/*Meal Page*/
+.week-filter{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom:25px ;
+}
+.current-week{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.current-week span{
+  font-size: 14px;
+  color: #452d39;
+}
+.current-week strong{
+  font-size: 18px;
+}
+.current-week .space{
+  margin: 0 5px;
+  color: #f19bc4;
+}
+.previous{
+  background-color: #6cd973;
+  color: white;
+  font-weight: 600;
+}
+.next{
+  background-color: #6cd973;
+  color: white;
+  font-weight: 600;
 }

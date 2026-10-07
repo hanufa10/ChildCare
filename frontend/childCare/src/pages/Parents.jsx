@@ -198,7 +198,7 @@ function Parents() {
                     className="save-button"
                     onClick={handleAdd}
                     >
-                    Add Child
+                    Add Parent
                     </button>
 
                     <button
