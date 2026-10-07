@@ -1,0 +1,30 @@
+import { Link } from 'react-router-dom';
+function Sidebar() {
+  return (
+    <aside>
+      <h2>
+        Child <span>Care</span>
+      </h2>
+      <nav>
+        <ul>
+          <li>
+            <Link to="/">Dashboard</Link>
+          </li>
+          <li>
+            <Link to="/children">Children</Link>
+          </li>
+          <li>
+            <Link to="/parents">Parents</Link>
+          </li>
+          <li>
+            <Link to="/staff">Staff</Link>
+          </li>
+          <li>
+            <Link to="/meals">Meals</Link>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+  );
+}
+export default Sidebar;
