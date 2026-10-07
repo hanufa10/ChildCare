@@ -6,5 +6,5 @@ public class Meal
     public string Name { get; set; } = string.Empty;
     public DateTime Date { get; set; }
     public MealType Type { get; set; }
-    public string MealName { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 }
