@@ -6,6 +6,8 @@ import Children from './pages/Children'
 import Parents from './pages/Parents'
 import Staff from './pages/Staff'
 import Meals from './pages/Meals'
+import ParentChildren from './pages/ParentChildren'
+
 
 function App() {
   return (
@@ -19,6 +21,7 @@ function App() {
           <Route path="/parents" element={<Parents />} />
           <Route path="/staff" element={<Staff />} />
           <Route path="/meals" element={<Meals />} />
+          <Route path="/parent-children" element={<ParentChildren />} />
         </Routes>
       </main>
       </BrowserRouter>

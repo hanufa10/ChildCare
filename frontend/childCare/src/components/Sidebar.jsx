@@ -17,6 +17,11 @@ function Sidebar() {
             <Link to="/parents">Parents</Link>
           </li>
           <li>
+            <Link to="/parent-children">
+              Parent & Child
+            </Link>
+          </li>
+          <li>
             <Link to="/staff">Staff</Link>
           </li>
           <li>
