@@ -7,6 +7,8 @@ public class Child
     public DateOnly DateOfBirth { get; set; }
     public string Gender { get; set; } = string.Empty;
     public ICollection<ParentChild> ParentChildren { get; set; } = new List<ParentChild>();
+    public DateOnly CreatedDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+
     public int Age
     {
         get

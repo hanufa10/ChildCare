@@ -222,10 +222,18 @@ function Children() {
 
   return (
     <div className="children-page">
-      <div>
-        <h2 >Children</h2>
-        <p style={{color:"#807f7f", fontSize: "14px"}}>Manage enrolled children</p>
+      <div className="registration-header">
+
+        <div>
+          <h1>Children</h1>
+
+          <p>
+            Manage enrolled children
+          </p>
+        </div>
+
       </div>
+      
       {/* TOP BAR */}
       <div className="children-toolbar">
 
@@ -449,6 +457,7 @@ function Children() {
                 <th>DATE OF BIRTH</th>
                 <th>GENDER</th>
                 <th>PARENT / GUARDIAN</th>
+                <th>REGISTERED DATE</th>
                 <th>ACTIONS</th>
               </tr>
             </thead>
@@ -507,7 +516,8 @@ function Children() {
                       .join(', ') || '—'
                     }
                   </td>
-
+                    {/*REGISTRATION DATE*/}
+                    <td>{child.createdDate}</td>
                   {/* ACTIONS */}
                   <td>
 
