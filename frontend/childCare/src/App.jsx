@@ -1,13 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './App.css'
-import Dashboard from './pages/Dashboard'
 import Sidebar from './components/Sidebar'
+import Header from './components/Header'
+
+import Dashboard from './pages/Dashboard'
 import Children from './pages/Children'
 import Parents from './pages/Parents'
 import Staff from './pages/Staff'
 import Meals from './pages/Meals'
 import ParentChildren from './pages/ParentChildren'
 import AboutUs from './pages/AboutUs'
+import Registration from './pages/Registration'
 
 
 function App() {
@@ -16,6 +19,8 @@ function App() {
         <Sidebar />
 
       <main>
+        <Header />
+        <div className='main-div'>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/children" element={<Children />} />
@@ -24,7 +29,9 @@ function App() {
           <Route path="/meals" element={<Meals />} />
           <Route path="/parent-children" element={<ParentChildren />} />
           <Route path="/aboutus" element={<AboutUs/>}/>
+          <Route path='/registration' element={<Registration/>}/>
         </Routes>
+        </div>
       </main>
       </BrowserRouter>
   )
