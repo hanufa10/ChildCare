@@ -167,7 +167,7 @@ nav li.active svg {
 }
 
 .header-component input {
-  min-width: 300px;
+  width: 700px;
   margin: 0;
   padding: 20px 0;
   border: 0;
@@ -217,6 +217,57 @@ nav li.active svg {
   color: #c55789;
   font-size: 20px;
   font-weight: 600;
+}
+
+.attendance-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.attendance-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.chevron-rotated {
+    transform: rotate(180deg);
+}
+
+.attendance-trigger svg {
+    transition: transform 0.2s ease;
+}
+
+.attendance-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 220px;
+    padding: 7px;
+    background: #ffffff;
+    border: 1px solid #f1dce8;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(75, 42, 65, 0.14);
+    z-index: 1000;
+}
+
+.attendance-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px;
+    color: #594355;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.attendance-dropdown-item:hover {
+    background: #fff0f7;
+    color: #c15c91;
 }
 
 main {

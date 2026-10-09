@@ -12,7 +12,8 @@ import ParentChildren from './pages/ParentChildren'
 import AboutUs from './pages/AboutUs'
 import Registration from './pages/Registration'
 import ChildDetails from './pages/ChildDetails'
-
+import ChildrenAttendance from './pages/ChildrenAttendance'
+import StaffAttendance from './pages/StaffAttendance'
 
 function App() {
   return (
@@ -32,6 +33,8 @@ function App() {
           <Route path="/aboutus" element={<AboutUs/>}/>
           <Route path='/registration' element={<Registration/>}/>
           <Route path="/children/:id" element={<ChildDetails />} />
+          <Route path='/childrenAttendance' element ={<ChildrenAttendance/>}/>
+          <Route path='/staffAttendance' element={<StaffAttendance/>}/>
         </Routes>
         </div>
       </main>

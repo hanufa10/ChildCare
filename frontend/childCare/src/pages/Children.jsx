@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import {Link} from 'react-router-dom'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
+import ChildrenAttendance from "./ChildrenAttendance";
 
 
 function Children() {
@@ -745,9 +746,7 @@ setError('')
           </div>
 
         </div>
-
       </div>
-
               <DeleteConfirmModal
     show={deleteId !== null}
     title="Delete child?"
