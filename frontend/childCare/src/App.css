@@ -415,7 +415,12 @@ main {
 .meal-list strong {
   margin: 10px 0;
 }
-
+.graph {
+    width: 100%;
+    min-width: 0;
+    min-height: 260px;
+    margin-top: 20px;
+}
 /* 5. SHARED BUTTONS AND FORM UTILITIES */
 .actions,
 .form-buttons {
