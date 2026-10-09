@@ -13,6 +13,8 @@ public class DaycareDbContext : DbContext
     public DbSet<ParentChild> ParentChildren { get; set; } = null!;
     public DbSet<Meal> Meals {get;set;} = null!;
     public DbSet<Staff> Staff {get;set;} = null!;
+    public DbSet<ChildAttendance> ChildAttendances {get;set;}
+    public DbSet<StaffAttendance> StaffAttendances {get;set;}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,7 +28,12 @@ public class DaycareDbContext : DbContext
             .HasOne(pc => pc.Child)
             .WithMany(c => c.ParentChildren)
             .HasForeignKey(pc => pc.ChildId);
-        
+        modelBuilder.Entity<ChildAttendance>()
+            .HasIndex(a => new { a.ChildId, a.AttendanceDate })
+            .IsUnique();
+        modelBuilder.Entity<StaffAttendance>()
+            .HasIndex(a => new { a.StaffId, a.AttendanceDate })
+            .IsUnique();
         base.OnModelCreating(modelBuilder);
     }
 }
