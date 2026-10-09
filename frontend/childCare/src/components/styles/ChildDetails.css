@@ -1,0 +1,435 @@
+
+/* =========================================
+   DAYCARE CHILD PROFILE
+========================================= */
+
+.daycare-child-profile-page {
+  min-height: 100vh;
+  padding: 32px;
+  /* background: #fff7fa; */
+  color: #390c2d;
+  box-sizing: border-box;
+}
+
+.daycare-child-profile-page * {
+  box-sizing: border-box;
+}
+
+/* Back navigation */
+
+.daycare-child-profile-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  color: #896e80;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.daycare-child-profile-back-link:hover {
+  color: #c34183;
+}
+
+/* Header */
+
+.daycare-child-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 32px;
+  margin-bottom: 24px;
+  background: #ffffff;
+  border: 1px solid #f0e2e9;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(65, 20, 48, 0.035);
+}
+
+.daycare-child-profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 90px;
+  height: 90px;
+  border-radius: 20px;
+  background: #fff0e4;
+  color: #b76b42;
+  font-size: 25px;
+  font-weight: 700;
+}
+
+.daycare-child-profile-heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.daycare-child-profile-heading h1 {
+  margin: 8px 0 6px;
+  color: #390c2d;
+  font-size: 28px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.daycare-child-profile-heading p {
+  margin: 0;
+  color: #8d7385;
+  font-size: 13px;
+}
+
+.daycare-child-profile-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: #eaf7f0;
+  color: #368b68;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.daycare-child-profile-status span {
+  font-size: 9px;
+}
+
+.daycare-child-profile-edit-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex-shrink: 0;
+  padding: 13px 20px;
+  border: 1px solid #e6d1dd;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #542b47;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.daycare-child-profile-edit-button:hover {
+  background: #fceaf2;
+  border-color: #e9b9d1;
+}
+
+/* Main layout */
+
+.daycare-child-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 0.9fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.daycare-child-profile-main {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+.daycare-child-profile-sidebar {
+  min-width: 0;
+}
+
+/* Cards */
+
+.daycare-child-profile-card {
+  min-width: 0;
+  padding: 27px;
+  background: #ffffff;
+  border: 1px solid #f0e2e9;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(65, 20, 48, 0.035);
+}
+
+.daycare-child-profile-card-heading {
+  padding-bottom: 22px;
+  border-bottom: 1px solid #f0e2e9;
+}
+
+.daycare-child-profile-card-heading h2 {
+  margin: 0 0 8px;
+  color: #390c2d;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.daycare-child-profile-card-heading p {
+  margin: 0;
+  color: #8d7385;
+  font-size: 13px;
+}
+
+/* Child information */
+
+.daycare-child-profile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding-top: 24px;
+}
+
+.daycare-child-profile-info-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.daycare-child-profile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #fceaf2;
+  color: #d64f91;
+}
+
+.daycare-child-profile-icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.daycare-child-profile-info-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.daycare-child-profile-info-item small {
+  color: #967e90;
+  font-size: 12px;
+}
+
+.daycare-child-profile-info-item strong {
+  color: #3f2638;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Parent / guardian */
+
+.daycare-child-profile-parent-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.daycare-child-profile-parent-item {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 20px 0;
+  border-bottom: 1px solid #f2e6ec;
+}
+
+.daycare-child-profile-parent-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.daycare-child-profile-parent-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  background: #fce8f1;
+  color: #bd4d88;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.daycare-child-profile-parent-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.daycare-child-profile-parent-info strong {
+  color: #3f2638;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.daycare-child-profile-parent-info small,
+.daycare-child-profile-parent-info span {
+  color: #8d7385;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.daycare-child-profile-parent-call {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-shrink: 0;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #fceaf2;
+  color: #b83d7c;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.daycare-child-profile-parent-call:hover {
+  background: #f8d7e7;
+}
+
+/* Registration details */
+
+.daycare-child-profile-registration {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 25px 0;
+}
+
+.daycare-child-profile-registration > div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 12px;
+}
+
+.daycare-child-profile-registration span {
+  color: #8d7385;
+}
+
+.daycare-child-profile-registration strong {
+  color: #3f2638;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* Emergency contact */
+
+.daycare-child-profile-emergency {
+  padding-top: 25px;
+  border-top: 1px solid #f0e2e9;
+}
+
+.daycare-child-profile-emergency h3 {
+  margin: 0 0 8px;
+  color: #390c2d;
+  font-size: 15px;
+}
+
+.daycare-child-profile-emergency > p {
+  margin: 0 0 20px;
+  color: #8d7385;
+  font-size: 12px;
+}
+
+.daycare-child-profile-emergency-call {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #f3c1d8;
+  border-radius: 10px;
+  background: #fceaf2;
+  color: #c34183;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.daycare-child-profile-emergency-call:hover {
+  background: #f8d7e7;
+  border-color: #eaa4c5;
+}
+
+/* Empty and loading states */
+
+.daycare-child-profile-empty,
+.daycare-child-profile-message {
+  color: #8d7385;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.daycare-child-profile-message {
+  padding: 40px;
+}
+
+.daycare-child-profile-message a {
+  color: #b83d7c;
+}
+
+/* Tablet layout */
+
+@media (max-width: 900px) {
+  .daycare-child-profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile layout */
+
+@media (max-width: 600px) {
+  .daycare-child-profile-page {
+    padding: 18px;
+  }
+
+  .daycare-child-profile-header {
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 22px;
+  }
+
+  .daycare-child-profile-avatar {
+    width: 65px;
+    height: 65px;
+    border-radius: 15px;
+    font-size: 20px;
+  }
+
+  .daycare-child-profile-heading h1 {
+    font-size: 22px;
+  }
+
+  .daycare-child-profile-edit-button {
+    width: 100%;
+  }
+
+  .daycare-child-profile-card {
+    padding: 20px;
+  }
+
+  .daycare-child-profile-info-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .daycare-child-profile-parent-item {
+    flex-wrap: wrap;
+  }
+
+  .daycare-child-profile-parent-call {
+    margin-left: 57px;
+  }
+}

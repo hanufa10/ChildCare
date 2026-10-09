@@ -13,6 +13,7 @@ import {
 import {Link} from 'react-router-dom'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
 
+
 function Children() {
   const [children, setChildren] = useState([])
   const [parentChildren, setParentChildren] = useState([])
@@ -20,11 +21,10 @@ function Children() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [viewingChild, setViewingChild] = useState(null)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('All records')
   const [currentPage, setCurrentPage] = useState(1)
-  const [showEmergencyContact, setShowEmergencyContact] = useState(false)
+  const [viewChild, setViewingChild] = useState(false)
   const childrenPerPage = 5
 
   const [newChild, setNewChild] = useState({
@@ -642,13 +642,14 @@ setError('')
 
                     <div className="table-actions">
 
-                      <button
-                        className="icon-button"
-                        title="View"
-                        onClick={()=>setViewingChild(child)}
-                      >
-                        <Eye size={18} />
-                      </button>
+         <Link
+  to={`/children/${child.id}`}
+  className="icon-button"
+  title="View child details"
+  aria-label={`View ${child.firstName} ${child.lastName}`}
+>
+  <Eye size={18} />
+</Link>
 
                       <button
                         className="icon-button"
@@ -746,198 +747,7 @@ setError('')
         </div>
 
       </div>
-{/* VIEW CHILD DETAILS MODAL */}
-{viewingChild && (
-  <div
-    className="child-modal-overlay"
-    onClick={() => setViewingChild(null)}
-  >
-    <div
-      className="child-details-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="child-modal-header">
-        <div>
-          <h2>Child Information</h2>
-          <p>Complete details about the child</p>
-        </div>
 
-        <button
-          className="child-modal-close"
-          onClick={() => setViewingChild(null)}
-          aria-label="Close"
-        >
-          ×
-        </button>
-      </div>
-
-      <div className="child-details-profile">
-        <div className="child-avatar child-details-avatar">
-          {getInitials(viewingChild)}
-        </div>
-
-        <div>
-          <h3>
-            {viewingChild.firstName} {viewingChild.lastName}
-          </h3>
-          <span>
-            Child ID: {viewingChild.id}
-          </span>
-        </div>
-      </div>
-
-      <div className="child-details-grid">
-        <div className="child-detail-item">
-          <span>Age</span>
-          <strong>{viewingChild.age} years</strong>
-        </div>
-
-        <div className="child-detail-item">
-          <span>Gender</span>
-          <strong>{viewingChild.gender || '—'}</strong>
-        </div>
-
-        <div className="child-detail-item">
-          <span>Date of Birth</span>
-          <strong>{formatDate(viewingChild.dateOfBirth)}</strong>
-        </div>
-
-        <div className="child-detail-item">
-          <span>Registration Date</span>
-          <strong>
-            {formatDate(viewingChild.createdDate)}
-          </strong>
-        </div>
-
-        <div className="child-detail-item full-width">
-          <span>Parent / Guardian</span>
-          <strong>
-            {parentChildren
-              .filter(pc => pc.childId === viewingChild.id)
-              .map(pc =>
-                `${pc.parent?.firstName ?? ''} ${pc.parent?.lastName ?? ''}`.trim()
-              )
-              .filter(Boolean)
-              .join(', ') || 'No parent or guardian recorded'}
-          </strong>
-        </div>
-
-        <div className="child-detail-item full-width">
-          <span>Allergies</span>
-          <strong>
-            {viewingChild.allergies?.trim() || 'None recorded'}
-          </strong>
-        </div>
-
-        <div className="child-detail-item full-width">
-          <span>Health Conditions</span>
-          <strong>
-            {viewingChild.healthCondition?.trim() || 'None recorded'}
-          </strong>
-        </div>
-      </div>
-              <button
-  type="button"
-  className="emergency-contact-button"
-  onClick={() => setShowEmergencyContact(true)}
->
-  <Phone size={18} />
-  Emergency Contact
-</button>
-      <div className="child-modal-footer">
-        <button
-          className="cancel-button"
-          onClick={() => setViewingChild(null)}
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-{/* EMERGENCY CONTACT POPUP */}
-{showEmergencyContact && viewingChild && (
-  <div
-    className="child-modal-overlay emergency-overlay"
-    onClick={() => setShowEmergencyContact(false)}
-  >
-    <div
-      className="emergency-contact-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <div className="child-modal-header">
-        <div>
-          <h2>Emergency Contact</h2>
-          <p>
-            Parent or guardian of {viewingChild.firstName}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          className="child-modal-close"
-          onClick={() => setShowEmergencyContact(false)}
-          aria-label="Close"
-        >
-          ×
-        </button>
-      </div>
-
-      {(() => {
-        const contacts = parentChildren
-          .filter(pc => pc.childId === viewingChild.id)
-          .map(pc => ({
-            name: `${pc.parent?.firstName ?? ''} ${pc.parent?.lastName ?? ''}`.trim(),
-            phoneNumber: pc.parent?.phoneNumber
-          }))
-          .filter(contact => contact.phoneNumber)
-
-        return contacts.length > 0 ? (
-          <div className="emergency-contact-list">
-            {contacts.map((contact, index) => (
-              <div
-                className="emergency-contact-item"
-                key={`${contact.phoneNumber}-${index}`}
-              >
-                <div className="emergency-contact-icon">
-                  <Phone size={20} />
-                </div>
-
-                <div className="emergency-contact-info">
-                  <strong>{contact.name || 'Parent / Guardian'}</strong>
-                  <span>{contact.phoneNumber}</span>
-                </div>
-
-                <a
-                  className="emergency-call-button"
-                  href={`tel:${contact.phoneNumber}`}
-                  aria-label={`Call ${contact.name || 'parent or guardian'}`}
-                >
-                  <Phone size={16} />
-                  Call
-                </a>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="emergency-no-contact">
-            No parent or guardian phone number is available for this child.
-          </p>
-        )
-      })()}
-
-      <div className="child-modal-footer">
-        <button
-          type="button"
-          className="cancel-button"
-          onClick={() => setShowEmergencyContact(false)}
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  </div>
-)}
               <DeleteConfirmModal
     show={deleteId !== null}
     title="Delete child?"
