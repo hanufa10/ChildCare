@@ -7,7 +7,8 @@ import {
   Eye,
   Pencil,
   Trash2,
-  Plus
+  Plus,
+  Phone
 } from 'lucide-react'
 import {Link} from 'react-router-dom'
 import DeleteConfirmModal from '../components/DeleteConfirmModal'
@@ -19,11 +20,11 @@ function Children() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-
+  const [viewingChild, setViewingChild] = useState(null)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState('All records')
   const [currentPage, setCurrentPage] = useState(1)
-
+  const [showEmergencyContact, setShowEmergencyContact] = useState(false)
   const childrenPerPage = 5
 
   const [newChild, setNewChild] = useState({
@@ -158,7 +159,9 @@ function Children() {
             firstName: editingChild.firstName,
             lastName: editingChild.lastName,
             dateOfBirth: editingChild.dateOfBirth,
-            gender: editingChild.gender
+            gender: editingChild.gender,
+            allergies:editingChild.allergies,
+            healthCondition:editingChild.healthCondition
           })
         }
       )
@@ -166,16 +169,43 @@ function Children() {
       if (!response.ok) {
         throw new Error('Failed to update child')
       }
+      const birthDate = new Date(
+      `${editingChild.dateOfBirth.slice(0, 10)}T00:00:00`
+    )
+    const today = new Date()
 
-      setChildren(
-        children.map(child =>
-          child.id === editingChild.id
-            ? editingChild
-            : child
-        )
-      )
+    let age = today.getFullYear() - birthDate.getFullYear()
 
-      setEditingChild(null)
+    const hasHadBirthdayThisYear =
+      today.getMonth() > birthDate.getMonth() ||
+      (today.getMonth() === birthDate.getMonth() &&
+        today.getDate() >= birthDate.getDate())
+
+    if (!hasHadBirthdayThisYear) {
+      age--
+    }
+
+    const updatedChild = {
+      ...editingChild,
+      age
+    }
+      setChildren(prev =>
+  prev.map(child =>
+    child.id === editingChild.id
+      ? updatedChild
+      : child
+  )
+)
+
+// Update the View popup too, if it is open for this child
+setViewingChild(prev =>
+  prev?.id === updatedChild.id
+    ? updatedChild
+    : prev
+)
+
+setEditingChild(null)
+setError('')
 
     } catch (error) {
       setError(error.message)
@@ -193,11 +223,11 @@ function Children() {
     )
 
     if (!response.ok) {
-      throw new Error('Failed to delete staff')
+      throw new Error('Failed to delete child data')
     }
 
-    setStaff(
-      staffs.filter(child => child.id !== deleteId)
+    setChildren(
+      children.filter(child => child.id !== deleteId)
     )
 
     setDeleteId(null)
@@ -351,77 +381,161 @@ function Children() {
 
 
       {/* EDIT FORM */}
-      {editingChild && (
-        <div className="edit-form">
-
+      {/* EDIT CHILD MODAL */}
+{editingChild && (
+  <div
+    className="child-modal-overlay"
+    onClick={() => setEditingChild(null)}
+  >
+    <div
+      className="child-edit-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header */}
+      <div className="child-modal-header">
+        <div>
           <h2>Edit Child</h2>
+          <p>Update the child's personal information</p>
+        </div>
 
-          <input
-            type="text"
-            value={editingChild.firstName}
-            onChange={(e) =>
-              setEditingChild({
-                ...editingChild,
-                firstName: e.target.value
-              })
-            }
-            placeholder="First Name"
-          />
+        <button
+          type="button"
+          className="child-modal-close"
+          onClick={() => setEditingChild(null)}
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </div>
 
-          <input
-            type="text"
-            value={editingChild.lastName}
-            onChange={(e) =>
-              setEditingChild({
-                ...editingChild,
-                lastName: e.target.value
-              })
-            }
-            placeholder="Last Name"
-          />
+      {/* Form */}
+      <form
+        className="child-edit-form"
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleSave()
+        }}
+      >
+        <div className="child-edit-fields">
+          <div className="child-edit-field">
+            <label htmlFor="editFirstName">First name</label>
+            <input
+              id="editFirstName"
+              type="text"
+              value={editingChild.firstName || ''}
+              onChange={(e) =>
+                setEditingChild({
+                  ...editingChild,
+                  firstName: e.target.value
+                })
+              }
+              placeholder="Enter first name"
+              required
+            />
+          </div>
 
-          <select
-            value={editingChild.gender}
-            onChange={(e) =>
-              setEditingChild({
-                ...editingChild,
-                gender: e.target.value
-              })
-            }
-          >
-            <option value="">Select Gender</option>
-            <option value="Female">Female</option>
-            <option value="Male">Male</option>
-          </select>
+          <div className="child-edit-field">
+            <label htmlFor="editLastName">Last name</label>
+            <input
+              id="editLastName"
+              type="text"
+              value={editingChild.lastName || ''}
+              onChange={(e) =>
+                setEditingChild({
+                  ...editingChild,
+                  lastName: e.target.value
+                })
+              }
+              placeholder="Enter last name"
+              required
+            />
+          </div>
 
-          <input
-            type="date"
-            value={editingChild.dateOfBirth}
-            onChange={(e) =>
-              setEditingChild({
-                ...editingChild,
-                dateOfBirth: e.target.value
-              })
-            }
-          />
+          <div className="child-edit-field">
+            <label htmlFor="editDateOfBirth">Date of birth</label>
+            <input
+              id="editDateOfBirth"
+              type="date"
+              value={editingChild.dateOfBirth?.slice(0, 10) || ''}
+              onChange={(e) =>
+                setEditingChild({
+                  ...editingChild,
+                  dateOfBirth: e.target.value
+                })
+              }
+              required
+            />
+          </div>
 
+          <div className="child-edit-field">
+            <label htmlFor="editGender">Gender</label>
+            <select
+              id="editGender"
+              value={editingChild.gender || ''}
+              onChange={(e) =>
+                setEditingChild({
+                  ...editingChild,
+                  gender: e.target.value
+                })
+              }
+              required
+            >
+              <option value="">Select gender</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
+          </div>
+          
+          <div className="child-edit-field">
+            <label htmlFor="editallergies">Allergies</label>
+            <input
+              id="editallergies"
+              value={editingChild.allergies || ''}
+              onChange={(e) =>
+                setEditingChild({
+                  ...editingChild,
+                  allergies: e.target.value
+                })
+              }
+            />
+          </div>
+          <div className="child-edit-field">
+            <label htmlFor="editHealthCondition">Health Condition</label>
+            <input
+              id="editHealthCondition"
+              value={editingChild.healthCondition || ''}
+              onChange={(e) =>
+                setEditingChild({
+                  ...editingChild,
+                  healthCondition: e.target.value
+                })
+              }
+            />
+          </div>
+          
+        </div>
+
+        {/* Footer */}
+        <div className="child-edit-footer">
           <button
-            className="save-button"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-
-          <button
+            type="button"
             className="cancel-button"
             onClick={() => setEditingChild(null)}
           >
             Cancel
           </button>
 
+          <button
+            type="submit"
+            className="save-button"
+          >
+            Save changes
+          </button>
         </div>
-      )}
-
+      </form>
+    </div>
+  </div>
+)}
 
       {/* TABLE CARD */}
       <div className="children-table-card">
@@ -458,8 +572,18 @@ function Children() {
             </thead>
 
             <tbody>
-
-              {currentChildren.map(child => (
+              {currentChildren.length == 0 ?(
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="empty-state"
+                  >
+                    No child found
+                  </td>
+                </tr> 
+              )
+              :(
+              currentChildren.map(child => (
 
                 <tr key={child.id}>
 
@@ -521,6 +645,7 @@ function Children() {
                       <button
                         className="icon-button"
                         title="View"
+                        onClick={()=>setViewingChild(child)}
                       >
                         <Eye size={18} />
                       </button>
@@ -547,8 +672,8 @@ function Children() {
 
                 </tr>
 
-              ))}
-
+              ))
+            )}
             </tbody>
 
           </table>
@@ -621,10 +746,202 @@ function Children() {
         </div>
 
       </div>
+{/* VIEW CHILD DETAILS MODAL */}
+{viewingChild && (
+  <div
+    className="child-modal-overlay"
+    onClick={() => setViewingChild(null)}
+  >
+    <div
+      className="child-details-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="child-modal-header">
+        <div>
+          <h2>Child Information</h2>
+          <p>Complete details about the child</p>
+        </div>
+
+        <button
+          className="child-modal-close"
+          onClick={() => setViewingChild(null)}
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </div>
+
+      <div className="child-details-profile">
+        <div className="child-avatar child-details-avatar">
+          {getInitials(viewingChild)}
+        </div>
+
+        <div>
+          <h3>
+            {viewingChild.firstName} {viewingChild.lastName}
+          </h3>
+          <span>
+            Child ID: {viewingChild.id}
+          </span>
+        </div>
+      </div>
+
+      <div className="child-details-grid">
+        <div className="child-detail-item">
+          <span>Age</span>
+          <strong>{viewingChild.age} years</strong>
+        </div>
+
+        <div className="child-detail-item">
+          <span>Gender</span>
+          <strong>{viewingChild.gender || '—'}</strong>
+        </div>
+
+        <div className="child-detail-item">
+          <span>Date of Birth</span>
+          <strong>{formatDate(viewingChild.dateOfBirth)}</strong>
+        </div>
+
+        <div className="child-detail-item">
+          <span>Registration Date</span>
+          <strong>
+            {formatDate(viewingChild.createdDate)}
+          </strong>
+        </div>
+
+        <div className="child-detail-item full-width">
+          <span>Parent / Guardian</span>
+          <strong>
+            {parentChildren
+              .filter(pc => pc.childId === viewingChild.id)
+              .map(pc =>
+                `${pc.parent?.firstName ?? ''} ${pc.parent?.lastName ?? ''}`.trim()
+              )
+              .filter(Boolean)
+              .join(', ') || 'No parent or guardian recorded'}
+          </strong>
+        </div>
+
+        <div className="child-detail-item full-width">
+          <span>Allergies</span>
+          <strong>
+            {viewingChild.allergies?.trim() || 'None recorded'}
+          </strong>
+        </div>
+
+        <div className="child-detail-item full-width">
+          <span>Health Conditions</span>
+          <strong>
+            {viewingChild.healthCondition?.trim() || 'None recorded'}
+          </strong>
+        </div>
+      </div>
+              <button
+  type="button"
+  className="emergency-contact-button"
+  onClick={() => setShowEmergencyContact(true)}
+>
+  <Phone size={18} />
+  Emergency Contact
+</button>
+      <div className="child-modal-footer">
+        <button
+          className="cancel-button"
+          onClick={() => setViewingChild(null)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+{/* EMERGENCY CONTACT POPUP */}
+{showEmergencyContact && viewingChild && (
+  <div
+    className="child-modal-overlay emergency-overlay"
+    onClick={() => setShowEmergencyContact(false)}
+  >
+    <div
+      className="emergency-contact-modal"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="child-modal-header">
+        <div>
+          <h2>Emergency Contact</h2>
+          <p>
+            Parent or guardian of {viewingChild.firstName}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="child-modal-close"
+          onClick={() => setShowEmergencyContact(false)}
+          aria-label="Close"
+        >
+          ×
+        </button>
+      </div>
+
+      {(() => {
+        const contacts = parentChildren
+          .filter(pc => pc.childId === viewingChild.id)
+          .map(pc => ({
+            name: `${pc.parent?.firstName ?? ''} ${pc.parent?.lastName ?? ''}`.trim(),
+            phoneNumber: pc.parent?.phoneNumber
+          }))
+          .filter(contact => contact.phoneNumber)
+
+        return contacts.length > 0 ? (
+          <div className="emergency-contact-list">
+            {contacts.map((contact, index) => (
+              <div
+                className="emergency-contact-item"
+                key={`${contact.phoneNumber}-${index}`}
+              >
+                <div className="emergency-contact-icon">
+                  <Phone size={20} />
+                </div>
+
+                <div className="emergency-contact-info">
+                  <strong>{contact.name || 'Parent / Guardian'}</strong>
+                  <span>{contact.phoneNumber}</span>
+                </div>
+
+                <a
+                  className="emergency-call-button"
+                  href={`tel:${contact.phoneNumber}`}
+                  aria-label={`Call ${contact.name || 'parent or guardian'}`}
+                >
+                  <Phone size={16} />
+                  Call
+                </a>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="emergency-no-contact">
+            No parent or guardian phone number is available for this child.
+          </p>
+        )
+      })()}
+
+      <div className="child-modal-footer">
+        <button
+          type="button"
+          className="cancel-button"
+          onClick={() => setShowEmergencyContact(false)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
               <DeleteConfirmModal
     show={deleteId !== null}
     title="Delete child?"
-    message="Are you sure you want to delete this child?"
+    message="Are you sure you want to delete this child? This action cannot be undone."
     onConfirm={handleDelete}
     onCancel={() => setDeleteId(null)}
   />

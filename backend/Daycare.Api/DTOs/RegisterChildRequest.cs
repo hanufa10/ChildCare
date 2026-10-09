@@ -6,6 +6,8 @@ public class RegisterChildRequest
     public string ChildLastName { get; set; } = string.Empty;
     public DateOnly ChildDateOfBirth { get; set; }
     public string Gender { get; set; } = string.Empty;
+    public string Allergies { get; set; } = string.Empty;
+    public string HealthConditions { get; set; } = string.Empty;
 
     public int? ExistingParentId {get; set;}
 

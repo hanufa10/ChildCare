@@ -1082,7 +1082,7 @@ function Staff() {
       <DeleteConfirmModal
         show={deleteId !== null}
         title="Delete staff member?"
-        message="Are you sure you want to delete this staff member?"
+        message="Are you sure you want to delete this staff member? This action cannot be undone."
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
       />

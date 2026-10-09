@@ -24,6 +24,8 @@ function Registration() {
     childLastName: '',
     dateOfBirth: '',
     gender: '',
+    allergies: '',
+    healthConditions: '',
 
     existingParentId: null,
 
@@ -137,6 +139,8 @@ function Registration() {
         childDateOfBirth: form.dateOfBirth,
 
         gender: form.gender,
+        allergies: form.allergies,
+        healthConditions: form.healthConditions,
 
         // Existing parent
         existingParentId:
@@ -208,6 +212,8 @@ function Registration() {
         childLastName: '',
         dateOfBirth: '',
         gender: '',
+        allergies: '',
+        healthConditions: '',
 
         existingParentId: null,
 
@@ -412,9 +418,37 @@ function Registration() {
                 <ChevronDown size={18} />
 
               </div>
-
             </div>
 
+          {/* ALLERGIES */}
+          <div className="form-group">
+            <label>Allergies</label>
+            <textarea
+              name="allergies"
+              value={form.allergies}
+              onChange={handleChange}
+              placeholder="Enter known allergies, or leave blank if none"
+              rows={3}
+              />
+            <small>
+              Record food, medicine, or other known allergies.
+            </small>
+          </div>
+
+          {/* HEALTH CONDITIONS */}
+          <div className="form-group">
+            <label>Health conditions</label>
+            <textarea
+              name="healthConditions"
+              value={form.healthConditions}
+              onChange={handleChange}
+              placeholder="Enter relevant health conditions, or leave blank if none"
+              rows={3}
+            />
+            <small>
+              Record relevant conditions the daycare staff should know about.
+            </small>
+          </div>
           </div>
 
         </div>

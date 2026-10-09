@@ -51,6 +51,8 @@ public class RegistrationController : ControllerBase
             LastName = request.ChildLastName,
             DateOfBirth = request.ChildDateOfBirth,
             Gender = request.Gender,
+            Allergies = request.Allergies,
+            HealthCondition = request.HealthConditions
         };
 
         _context.Children.Add(child);

@@ -8,7 +8,8 @@ public class Child
     public string Gender { get; set; } = string.Empty;
     public ICollection<ParentChild> ParentChildren { get; set; } = new List<ParentChild>();
     public DateOnly CreatedDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-
+    public string Allergies {get; set;} = string.Empty;
+    public string HealthCondition {get;set;}=string.Empty;
     public int Age
     {
         get

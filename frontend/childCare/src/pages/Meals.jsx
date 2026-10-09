@@ -267,8 +267,9 @@ const handleEdit = async () => {
     setError(error.message)
   }
 }
-// Delete meal
 const handleDelete = async () => {
+  if (deleteId === null) return
+
   try {
     const response = await fetch(
       `http://localhost:5165/api/Meal/${deleteId}`,
@@ -278,13 +279,18 @@ const handleDelete = async () => {
     )
 
     if (!response.ok) {
-      throw new Error('Failed to delete meal')
+      throw new Error(
+        `Failed to delete meal. Status: ${response.status}`
+      )
     }
 
-    setMeals(
-      meals.filter(meal => meal.id !== deleteId)
+    // Update the meal list after successful deletion
+    setMeals(currentMeals =>
+      currentMeals.filter(meal => meal.id !== deleteId)
     )
 
+    // Close the popup and three-dot menu
+    setDeleteId(null)
     setOpenMenu(null)
 
   } catch (error) {
@@ -799,7 +805,7 @@ const openEditMeal = (meal) => {
         <DeleteConfirmModal
           show={deleteId !== null}
           title="Delete meal?"
-          message="Are you sure you want to remove this meal from the schedule?"
+          message="Are you sure you want to remove this meal from the schedule? This action cannot be undone."
           onConfirm={handleDelete}
           onCancel={() => setDeleteId(null)}
         />
