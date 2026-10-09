@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import DeleteConfirmModal from '../components/DeleteConfirmModal'
 
 function Meals() {
   const [meals, setMeals] = useState([])
@@ -31,6 +32,7 @@ function Meals() {
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [deleteId,setDeleteId] = useState(null)
 
   // Get meals from API
   useEffect(() => {
@@ -266,18 +268,10 @@ const handleEdit = async () => {
   }
 }
 // Delete meal
-const handleDelete = async (id) => {
-  const confirmed = window.confirm(
-    'Are you sure you want to delete this meal?'
-  )
-
-  if (!confirmed) {
-    return
-  }
-
+const handleDelete = async () => {
   try {
     const response = await fetch(
-      `http://localhost:5165/api/Meal/${id}`,
+      `http://localhost:5165/api/Meal/${deleteId}`,
       {
         method: 'DELETE'
       }
@@ -288,7 +282,7 @@ const handleDelete = async (id) => {
     }
 
     setMeals(
-      meals.filter(meal => meal.id !== id)
+      meals.filter(meal => meal.id !== deleteId)
     )
 
     setOpenMenu(null)
@@ -750,7 +744,7 @@ const openEditMeal = (meal) => {
 
       <button
         className="delete-menu-item"
-        onClick={() => handleDelete(meal.id)}
+        onClick={() => setDeleteId(meal.id)}
       >
         Delete
       </button>
@@ -802,7 +796,13 @@ const openEditMeal = (meal) => {
         </button>
 
       </div>
-
+        <DeleteConfirmModal
+          show={deleteId !== null}
+          title="Delete meal?"
+          message="Are you sure you want to remove this meal from the schedule?"
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteId(null)}
+        />
     </div>
   )
 }

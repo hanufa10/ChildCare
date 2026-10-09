@@ -11,6 +11,7 @@ import {
   X
 } from 'lucide-react'
 
+import DeleteConfirmModal from '../components/DeleteConfirmModal'
 function Parents() {
   const [parents, setParents] = useState([])
   const [parentChildren, setParentChildren] = useState([])
@@ -36,6 +37,7 @@ function Parents() {
     email: ''
   })
 
+  const [deleteId, setDeleteId] = useState(null)
   // Fetch parents and parent-child relationships
   useEffect(() => {
     Promise.all([
@@ -199,38 +201,29 @@ function Parents() {
   }
 
   // Delete parent
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this parent?'
+  const handleDelete = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:5165/api/Parent/${deleteId}`,
+      {
+        method: 'DELETE'
+      }
     )
 
-    if (!confirmed) {
-      return
+    if (!response.ok) {
+      throw new Error('Failed to delete parent')
     }
 
-    try {
-      const response = await fetch(
-        `http://localhost:5165/api/Parent/${id}`,
-        {
-          method: 'DELETE'
-        }
-      )
+    setParents(
+      parents.filter(parent => parent.id !== deleteId)
+    )
 
-      if (!response.ok) {
-        throw new Error('Failed to delete parent')
-      }
+    setDeleteId(null)
 
-      setParents(
-        parents.filter(parent => parent.id !== id)
-      )
-
-      if (selectedParent?.id === id) {
-        setSelectedParent(null)
-      }
-    } catch (error) {
-      setError(error.message)
-    }
+  } catch (error) {
+    setError(error.message)
   }
+}
 
   // Search reset
   const handleSearch = (value) => {
@@ -491,7 +484,7 @@ function Parents() {
                             className="icon-action delete-action"
                             title="Delete"
                             onClick={() =>
-                              handleDelete(parent.id)
+                              setDeleteId(parent.id)
                             }
                           >
                             <Trash2 size={18} />
@@ -935,7 +928,13 @@ function Parents() {
         </div>
 
       )}
-
+    <DeleteConfirmModal
+        show={deleteId !== null}
+        title="Delete parent?"
+        message="Are you sure you want to delete this parent? This action cannot be undone."
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+    />
     </div>
   )
 }

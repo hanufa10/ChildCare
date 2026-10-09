@@ -10,7 +10,7 @@ import {
   Plus,
   X
 } from 'lucide-react'
-
+import DeleteConfirmModal from '../components/DeleteConfirmModal'
 function Staff() {
   const [staffs, setStaff] = useState([])
   const [editingStaff, setEditingStaff] = useState(null)
@@ -35,7 +35,7 @@ function Staff() {
     position: '',
     hireDate: ''
   })
-
+  const [deleteId,setDeleteId] = useState(null)
   // =========================
   // FETCH STAFF
   // =========================
@@ -153,39 +153,29 @@ function Staff() {
   // DELETE STAFF
   // =========================
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this staff member?'
+  const handleDelete = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:5165/api/Staff/${deleteId}`,
+      {
+        method: 'DELETE'
+      }
     )
 
-    if (!confirmed) {
-      return
+    if (!response.ok) {
+      throw new Error('Failed to delete staff')
     }
 
-    try {
-      const response = await fetch(
-        `http://localhost:5165/api/Staff/${id}`,
-        {
-          method: 'DELETE'
-        }
-      )
+    setStaff(
+      staffs.filter(staff => staff.id !== deleteId)
+    )
 
-      if (!response.ok) {
-        throw new Error('Failed to delete staff')
-      }
+    setDeleteId(null)
 
-      setStaff(
-        staffs.filter(staff => staff.id !== id)
-      )
-
-      if (selectedStaff?.id === id) {
-        setSelectedStaff(null)
-      }
-
-    } catch (error) {
-      setError(error.message)
-    }
+  } catch (error) {
+    setError(error.message)
   }
+}
 
   // =========================
   // SEARCH & FILTER
@@ -512,9 +502,7 @@ function Staff() {
                         <button
                           className="staff-icon-button staff-delete-button"
                           title="Delete"
-                          onClick={() =>
-                            handleDelete(staff.id)
-                          }
+                          onClick={() => setDeleteId(staff.id)}
                         >
                           <Trash2 size={18} />
                         </button>
@@ -1091,7 +1079,13 @@ function Staff() {
         </div>
 
       )}
-
+      <DeleteConfirmModal
+        show={deleteId !== null}
+        title="Delete staff member?"
+        message="Are you sure you want to delete this staff member?"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteId(null)}
+      />
     </div>
   )
 }

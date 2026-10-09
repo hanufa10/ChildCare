@@ -10,6 +10,7 @@ import {
   Plus
 } from 'lucide-react'
 import {Link} from 'react-router-dom'
+import DeleteConfirmModal from '../components/DeleteConfirmModal'
 
 function Children() {
   const [children, setChildren] = useState([])
@@ -31,7 +32,7 @@ function Children() {
     dateOfBirth: '',
     gender: ''
   })
-
+  const [deleteId,setDeleteId]=useState(null)
   // Get children
   useEffect(() => {
     Promise.all([
@@ -182,35 +183,29 @@ function Children() {
   }
 
   // Delete child
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      'Are you sure you want to delete this child?'
+  const handleDelete = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:5165/api/Children/${deleteId}`,
+      {
+        method: 'DELETE'
+      }
     )
 
-    if (!confirmed) {
-      return
+    if (!response.ok) {
+      throw new Error('Failed to delete staff')
     }
 
-    try {
-      const response = await fetch(
-        `http://localhost:5165/api/Children/${id}`,
-        {
-          method: 'DELETE'
-        }
-      )
+    setStaff(
+      staffs.filter(child => child.id !== deleteId)
+    )
 
-      if (!response.ok) {
-        throw new Error('Failed to delete child data')
-      }
+    setDeleteId(null)
 
-      setChildren(
-        children.filter(child => child.id !== id)
-      )
-
-    } catch (error) {
-      setError(error.message)
-    }
+  } catch (error) {
+    setError(error.message)
   }
+}
 
   if (loading) {
     return <p>Loading children...</p>
@@ -541,7 +536,7 @@ function Children() {
                       <button
                         className="icon-button delete"
                         title="Delete"
-                        onClick={() => handleDelete(child.id)}
+                        onClick={() => setDeleteId(child.id)}
                       >
                         <Trash2 size={17} />
                       </button>
@@ -626,7 +621,13 @@ function Children() {
         </div>
 
       </div>
-
+              <DeleteConfirmModal
+    show={deleteId !== null}
+    title="Delete child?"
+    message="Are you sure you want to delete this child?"
+    onConfirm={handleDelete}
+    onCancel={() => setDeleteId(null)}
+  />
     </div>
   )
 }
