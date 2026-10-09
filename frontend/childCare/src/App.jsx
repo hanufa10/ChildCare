@@ -14,6 +14,7 @@ import Registration from './pages/Registration'
 import ChildDetails from './pages/ChildDetails'
 import ChildrenAttendance from './pages/ChildrenAttendance'
 import StaffAttendance from './pages/StaffAttendance'
+import DietaryNeeds from "./pages/DietaryNeeds";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/children/:id" element={<ChildDetails />} />
           <Route path='/childrenAttendance' element ={<ChildrenAttendance/>}/>
           <Route path='/staffAttendance' element={<StaffAttendance/>}/>
+          <Route path='/dietary-needs' element={<DietaryNeeds />}/>
         </Routes>
         </div>
       </main>

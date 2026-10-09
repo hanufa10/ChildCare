@@ -1,0 +1,149 @@
+
+.dietary-page {
+    padding: 24px;
+    color: #352b35;
+}
+
+.dietary-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.dietary-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #a94d7c;
+    text-decoration: none;
+    margin-bottom: 14px;
+}
+
+.dietary-page-header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+.dietary-page-header p {
+    margin: 0;
+    color: #827582;
+}
+
+.dietary-total {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 22px;
+    background: #fceaf3;
+    color: #b84f86;
+    border-radius: 14px;
+}
+
+.dietary-total strong,
+.dietary-total span {
+    display: block;
+}
+
+.dietary-total strong {
+    font-size: 22px;
+}
+
+.dietary-total span {
+    font-size: 13px;
+}
+
+.dietary-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border: 1px solid #eadde7;
+    border-radius: 12px;
+    color: #a18b9d;
+    background: white;
+}
+
+.dietary-search input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    background: transparent;
+}
+
+.dietary-table-wrapper {
+    overflow-x: auto;
+    background: white;
+    border: 1px solid #f0e4ed;
+    border-radius: 14px;
+}
+
+.dietary-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.dietary-table th {
+    padding: 16px;
+    background: #fcf4f8;
+    color: #705c6d;
+    font-size: 13px;
+}
+
+.dietary-table td {
+    padding: 18px 16px;
+    border-top: 1px solid #f2eaf0;
+    vertical-align: top;
+}
+
+.dietary-table th:first-child,
+.dietary-table td:first-child {
+    min-width: 180px;
+}
+
+.dietary-value {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dietary-empty,
+.dietary-error {
+    padding: 20px;
+    color: #827582;
+}
+
+.dietary-error {
+    color: #b42318;
+}
+
+.dietary-reminder {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 22px;
+    padding: 16px;
+    border-radius: 12px;
+    background: #fff7e8;
+    color: #8a611c;
+}
+
+.dietary-reminder p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+    .dietary-page {
+        padding: 16px;
+    }
+
+    .dietary-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
