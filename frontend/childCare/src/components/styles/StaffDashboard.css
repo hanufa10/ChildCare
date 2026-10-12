@@ -1,0 +1,196 @@
+
+.staff-dashboard {
+  min-height: 100vh;
+  background: #f8f7fc;
+  color: #302d42;
+  font-family: Arial, sans-serif;
+}
+
+.staff-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 6%;
+  background: #ffffff;
+  border-bottom: 1px solid #eeeaf5;
+}
+
+.staff-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.staff-logo {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #f5e8f7;
+  color: #a44ca5;
+  font-size: 30px;
+}
+
+.staff-brand h2 {
+  margin: 0 0 4px;
+  font-size: 21px;
+}
+
+.staff-brand p {
+  margin: 0;
+  color: #888399;
+  font-size: 13px;
+}
+
+.staff-logout-button {
+  padding: 11px 20px;
+  border: 1px solid #e8d7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #9b479f;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.staff-logout-button:hover {
+  background: #a44ca5;
+  color: #ffffff;
+}
+
+.staff-main {
+  width: min(1100px, 88%);
+  margin: 36px auto;
+}
+
+.staff-welcome-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 38px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #f3e8f8, #fff0ed);
+}
+
+.staff-welcome-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
+  background: #ffffff;
+  color: #a44ca5;
+  font-size: 48px;
+  box-shadow: 0 5px 20px rgba(90, 50, 100, 0.08);
+}
+
+.staff-eyebrow {
+  margin: 0 0 10px;
+  color: #9b479f;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.staff-welcome-card h1 {
+  margin: 0 0 12px;
+  font-size: clamp(25px, 4vw, 36px);
+}
+
+.staff-welcome-text {
+  max-width: 620px;
+  margin: 0;
+  color: #6f687d;
+  line-height: 1.7;
+}
+
+.staff-info-section {
+  margin-top: 40px;
+}
+
+.staff-info-section h2 {
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.staff-section-description {
+  margin-top: 0;
+  color: #827c90;
+  line-height: 1.6;
+}
+
+.staff-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.staff-info-card {
+  padding: 26px;
+  border: 1px solid #eeeaf5;
+  border-radius: 16px;
+  background: #ffffff;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.staff-info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(50, 40, 80, 0.07);
+}
+
+.staff-card-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #f7eaf8;
+  color: #a44ca5;
+  font-size: 25px;
+}
+
+.staff-info-card h3 {
+  margin: 20px 0 10px;
+  font-size: 18px;
+}
+
+.staff-info-card p {
+  margin: 0;
+  color: #827c90;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.staff-footer {
+  margin-top: 45px;
+  padding: 20px 0;
+  border-top: 1px solid #e9e5ef;
+  color: #928ba0;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 750px) {
+  .staff-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-welcome-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 26px;
+  }
+
+  .staff-header {
+    padding: 16px 6%;
+  }
+
+  .staff-main {
+    margin-top: 24px;
+  }
+}

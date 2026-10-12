@@ -82,6 +82,8 @@ function AuthPage() {
       }
 
       const roles = Array.isArray(data.roles) ? data.roles : [];
+      console.log("Logged-in user:", data.email);
+console.log("Roles returned by API:", JSON.stringify(roles));
 
       // Keep the token and basic user details for this prototype.
       // Never store the user's password.
@@ -101,8 +103,11 @@ function AuthPage() {
       // Notify App.jsx that login was successful
       window.dispatchEvent(new Event("authChanged"));
 
-      if (roles.includes("Admin") || roles.includes("Staff")) {
+
+      if (roles.includes("Admin")) {
         navigate("/dashboard", { replace: true });
+      } else if (roles.includes("Staff")) {
+        navigate("/staff-dashboard", { replace: true });
       } else if (roles.includes("Parent")) {
         navigate("/parent-dashboard", { replace: true });
       } else {
@@ -112,6 +117,7 @@ function AuthPage() {
 
         throw new Error("Your account does not have an assigned role.");
       }
+
     } catch (error) {
       showMessage(
         error instanceof TypeError
@@ -140,8 +146,6 @@ function AuthPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        // Do not send confirmPassword or a role.
-        // The backend assigns the Parent role.
         body: JSON.stringify({
           firstName: signupData.firstName.trim(),
           lastName: signupData.lastName.trim(),

@@ -18,8 +18,10 @@ import ChildrenAttendance from "./pages/ChildrenAttendance";
 import StaffAttendance from "./pages/StaffAttendance";
 import DietaryNeeds from "./pages/DietaryNeeds";
 import AuthPage from "./pages/AuthPage";
-import ParentDashboard from "./pages/ParentDashboard";
 import AdminUsers from "./pages/AdminUsers";
+
+import ParentDashboard from "./pages/ParentDashboard";
+import StaffDashboard from "./pages/StaffDashboard";
 
 function getAuthUser() {
   try {
@@ -52,12 +54,14 @@ function DashboardLayout() {
             <Route path="staffAttendance" element={<StaffAttendance />} />
             <Route path="dietary-needs" element={<DietaryNeeds />} />
             <Route path="/admin-users" element={<AdminUsers />} />
+            <Route path="/staff-dashboard" element={<StaffDashboard />} />          
           </Routes>
         </div>
       </main>
     </>
   );
 }
+
 
 
 function AppRoutes() {
@@ -84,7 +88,20 @@ function AppRoutes() {
   }, []);
 
   const isLoggedIn = Boolean(auth.token && auth.user);
-  const isParent = auth.user?.roles?.includes("Parent");
+  const roles = auth.user?.roles || [];
+  const isAdmin = roles.includes("Admin");
+  const isStaff = roles.includes("Staff");
+  const isParent = roles.includes("Parent");
+
+  let homeRoute = "/login";
+
+  if (isAdmin) {
+    homeRoute = "/dashboard";
+  } else if (isStaff) {
+    homeRoute = "/staff-dashboard";
+  } else if (isParent) {
+    homeRoute = "/parent-dashboard";
+  }
 
   return (
     <Routes>
@@ -92,10 +109,7 @@ function AppRoutes() {
         path="/login"
         element={
           isLoggedIn ? (
-            <Navigate
-              to={isParent ? "/parent-dashboard" : "/dashboard"}
-              replace
-            />
+            <Navigate to={homeRoute} replace />
           ) : (
             <AuthPage />
           )
@@ -106,50 +120,56 @@ function AppRoutes() {
         path="/signup"
         element={
           isLoggedIn ? (
-            <Navigate
-              to={isParent ? "/parent-dashboard" : "/dashboard"}
-              replace
-            />
+            <Navigate to={homeRoute} replace />
           ) : (
             <AuthPage />
           )
         }
       />
 
-
+      {/* Admin dashboard and its existing pages */}
       <Route
-  path="/dashboard/*"
-  element={
-    isLoggedIn && !isParent ? (
-      <DashboardLayout />
-    ) : (
-      <Navigate to="/login" replace />
-    )
-  }
-/>
-
-      <Route
-        path="/*"
+        path="/dashboard/*"
         element={
-          !isLoggedIn ? (
-            <Navigate to="/login" replace />
-          ) : isParent ? (
-            <Navigate to="/parent-dashboard" replace />
-          ) : (
+          isLoggedIn && isAdmin ? (
             <DashboardLayout />
+          ) : (
+            <Navigate to={homeRoute} replace />
           )
         }
       />
+
+      {/* Staff dashboard */}
       <Route
-  path="/parent-dashboard"
-  element={
-    isLoggedIn && isParent ? (
-      <ParentDashboard />
-    ) : (
-      <Navigate to="/login" replace />
-    )
-  }
-/>
+        path="/staff-dashboard"
+        element={
+          isLoggedIn && isStaff && !isAdmin ? (
+            <StaffDashboard />
+          ) : (
+            <Navigate to={homeRoute} replace />
+          )
+        }
+      />
+
+      {/* Parent dashboard */}
+      <Route
+        path="/parent-dashboard"
+        element={
+          isLoggedIn && isParent && !isAdmin && !isStaff ? (
+            <ParentDashboard />
+          ) : (
+            <Navigate to={homeRoute} replace />
+          )
+        }
+      />
+
+      {/* Unknown routes */}
+      <Route
+        path="*"
+        element={
+          <Navigate to={homeRoute} replace />
+        }
+      />
     </Routes>
   );
 }
