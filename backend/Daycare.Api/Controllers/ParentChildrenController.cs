@@ -2,6 +2,8 @@ using Daycare.Api.Data;
 using Daycare.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Daycare.Api.Controllers;
 
@@ -79,4 +81,26 @@ public class ParentChildrenController : ControllerBase
 
         return NoContent();
     }
+[Authorize(Roles = "Parent")]
+[HttpGet("my-children")]
+public async Task<ActionResult<IEnumerable<ParentChild>>> GetMyChildren()
+{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    if (string.IsNullOrEmpty(userId))
+        return Unauthorized();
+
+    var parent = await _context.Parents
+        .FirstOrDefaultAsync(p => p.ApplicationUserId == userId);
+
+    if (parent == null)
+        return NotFound("Parent profile not found for this account.");
+
+    var children = await _context.ParentChildren
+        .Include(pc => pc.Child)
+        .Where(pc => pc.ParentId == parent.Id)
+        .ToListAsync();
+
+    return Ok(children);
+}
 }

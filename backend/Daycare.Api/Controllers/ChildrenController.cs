@@ -8,7 +8,7 @@ namespace Daycare.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin,Staff")]
+[Authorize]
 public class ChildrenController : ControllerBase
 {
     private readonly DaycareDbContext _context;
@@ -46,32 +46,71 @@ public class ChildrenController : ControllerBase
         return CreatedAtAction(nameof(GetChild), new { id = child.Id }, child);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateChild(int id, Child child)
+    
+[HttpPut("{id}")]
+public async Task<IActionResult> UpdateChild(int id, Child child)
+{
+    if (id != child.Id)
     {
-        if (id != child.Id)
-        {
-            return BadRequest();
-        }
-
-        _context.Entry(child).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!ChildExists(id))
-            {
-                return NotFound();
-            }
-
-            throw;
-        }
-
-        return NoContent();
+        return BadRequest("Child ID does not match.");
     }
+
+    var existingChild = await _context.Children.FindAsync(id);
+
+    if (existingChild == null)
+    {
+        return NotFound();
+    }
+
+    var isAdminOrStaff =
+        User.IsInRole("Admin") || User.IsInRole("Staff");
+
+    if (!isAdminOrStaff)
+    {
+        if (!User.IsInRole("Parent"))
+        {
+            return Forbid();
+        }
+
+        var userId = User.FindFirst(
+            System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Forbid();
+        }
+
+        var parent = await _context.Parents
+            .FirstOrDefaultAsync(p => p.ApplicationUserId == userId);
+
+        if (parent == null)
+        {
+            return Forbid();
+        }
+
+        var isLinked = await _context.ParentChildren
+            .AnyAsync(pc =>
+                pc.ParentId == parent.Id &&
+                pc.ChildId == id);
+
+        if (!isLinked)
+        {
+            return Forbid();
+        }
+    }
+
+    existingChild.FirstName = child.FirstName;
+    existingChild.LastName = child.LastName;
+    existingChild.DateOfBirth = child.DateOfBirth;
+    existingChild.Gender = child.Gender;
+    existingChild.Allergies = child.Allergies;
+    existingChild.HealthCondition = child.HealthCondition;
+
+    await _context.SaveChangesAsync();
+
+    return NoContent();
+}
+
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteChild(int id)
