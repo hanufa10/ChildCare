@@ -203,6 +203,9 @@ namespace Daycare.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("text");
@@ -220,6 +223,9 @@ namespace Daycare.Api.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId")
+                        .IsUnique();
 
                     b.ToTable("Parents");
                 });
@@ -464,6 +470,14 @@ namespace Daycare.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Child");
+                });
+
+            modelBuilder.Entity("Daycare.Api.Models.Parent", b =>
+                {
+                    b.HasOne("Daycare.Api.Identity.ApplicationUser", null)
+                        .WithOne()
+                        .HasForeignKey("Daycare.Api.Models.Parent", "ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Daycare.Api.Models.ParentChild", b =>

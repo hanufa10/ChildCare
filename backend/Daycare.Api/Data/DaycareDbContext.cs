@@ -23,44 +23,59 @@ public class DaycareDbContext
     public DbSet<ChildAttendance> ChildAttendances { get; set; } = null!;
     public DbSet<StaffAttendance> StaffAttendances { get; set; } = null!;
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        // Configure the Identity tables first.
-        base.OnModelCreating(modelBuilder);
-        
-modelBuilder.Entity<Staff>()
-    .HasOne<ApplicationUser>()
-    .WithOne()
-    .HasForeignKey<Staff>(s => s.ApplicationUserId)
-    .IsRequired(false)
-    .OnDelete(DeleteBehavior.Restrict);
+   
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    // Configure Identity tables first.
+    base.OnModelCreating(modelBuilder);
 
-modelBuilder.Entity<Staff>()
-    .HasIndex(s => s.ApplicationUserId)
-    .IsUnique();
+    // Link each staff profile to its login account.
+    modelBuilder.Entity<Staff>()
+        .HasOne<ApplicationUser>()
+        .WithOne()
+        .HasForeignKey<Staff>(s => s.ApplicationUserId)
+        .IsRequired(false)
+        .OnDelete(DeleteBehavior.Restrict);
 
-        // Preserve the existing ParentChild relationship.
-        modelBuilder.Entity<ParentChild>()
-            .HasKey(pc => new { pc.ParentId, pc.ChildId });
+    modelBuilder.Entity<Staff>()
+        .HasIndex(s => s.ApplicationUserId)
+        .IsUnique();
 
-        modelBuilder.Entity<ParentChild>()
-            .HasOne(pc => pc.Parent)
-            .WithMany(p => p.ParentChildren)
-            .HasForeignKey(pc => pc.ParentId);
+    // Link each parent profile to its login account.
+    modelBuilder.Entity<Parent>()
+        .HasOne<ApplicationUser>()
+        .WithOne()
+        .HasForeignKey<Parent>(p => p.ApplicationUserId)
+        .IsRequired(false)
+        .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<ParentChild>()
-            .HasOne(pc => pc.Child)
-            .WithMany(c => c.ParentChildren)
-            .HasForeignKey(pc => pc.ChildId);
+    modelBuilder.Entity<Parent>()
+        .HasIndex(p => p.ApplicationUserId)
+        .IsUnique();
 
-        // Prevent duplicate attendance records for the same child/date.
-        modelBuilder.Entity<ChildAttendance>()
-            .HasIndex(a => new { a.ChildId, a.AttendanceDate })
-            .IsUnique();
+    // Preserve the existing ParentChild relationship.
+    modelBuilder.Entity<ParentChild>()
+        .HasKey(pc => new { pc.ParentId, pc.ChildId });
 
-        // Prevent duplicate attendance records for the same staff/date.
-        modelBuilder.Entity<StaffAttendance>()
-            .HasIndex(a => new { a.StaffId, a.AttendanceDate })
-            .IsUnique();
-    }
+    modelBuilder.Entity<ParentChild>()
+        .HasOne(pc => pc.Parent)
+        .WithMany(p => p.ParentChildren)
+        .HasForeignKey(pc => pc.ParentId);
+
+    modelBuilder.Entity<ParentChild>()
+        .HasOne(pc => pc.Child)
+        .WithMany(c => c.ParentChildren)
+        .HasForeignKey(pc => pc.ChildId);
+
+    // Prevent duplicate attendance records for the same child/date.
+    modelBuilder.Entity<ChildAttendance>()
+        .HasIndex(a => new { a.ChildId, a.AttendanceDate })
+        .IsUnique();
+
+    // Prevent duplicate attendance records for the same staff/date.
+    modelBuilder.Entity<StaffAttendance>()
+        .HasIndex(a => new { a.StaffId, a.AttendanceDate })
+        .IsUnique();
+}
+
 }

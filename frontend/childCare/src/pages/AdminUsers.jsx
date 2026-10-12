@@ -10,7 +10,7 @@ const initialForm = {
   email: "",
   phoneNumber: "",
   password: "",
-  role: "Staff",
+  role: "Parent",
   gender: "",
   position: "",
   hireDate: "",
@@ -61,13 +61,8 @@ export default function AdminUsers() {
       [name]: value,
     }));
 
-    if (error) {
-      setError("");
-    }
-
-    if (success) {
-      setSuccess("");
-    }
+    setError("");
+    setSuccess("");
   }
 
   async function handleSubmit(e) {
@@ -85,7 +80,7 @@ export default function AdminUsers() {
       return;
     }
 
-    // Send employee details only when creating a Staff account.
+    // Include staff details only when creating a Staff account.
     const requestBody = {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
@@ -156,7 +151,7 @@ export default function AdminUsers() {
       <div className="admin-users-heading">
         <div>
           <h1>User Management</h1>
-          <p>Create administrator and staff accounts.</p>
+          <p>Create parent, staff, and administrator accounts.</p>
         </div>
       </div>
 
@@ -255,6 +250,7 @@ export default function AdminUsers() {
                 onChange={handleChange}
                 required
               >
+                <option value="Parent">Parent</option>
                 <option value="Staff">Staff</option>
                 <option value="Admin">Admin</option>
               </select>
