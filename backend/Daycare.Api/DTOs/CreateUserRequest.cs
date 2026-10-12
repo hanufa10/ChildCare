@@ -19,6 +19,10 @@ public class CreateUserRequest
 
     [Required, MinLength(8)]
     public string Password { get; set; } = string.Empty;
+    
+public string? Gender { get; set; }
+public string? Position { get; set; }
+public DateOnly? HireDate { get; set; }
 
     [Required]
     public string Role { get; set; } = string.Empty;

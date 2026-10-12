@@ -27,6 +27,17 @@ public class DaycareDbContext
     {
         // Configure the Identity tables first.
         base.OnModelCreating(modelBuilder);
+        
+modelBuilder.Entity<Staff>()
+    .HasOne<ApplicationUser>()
+    .WithOne()
+    .HasForeignKey<Staff>(s => s.ApplicationUserId)
+    .IsRequired(false)
+    .OnDelete(DeleteBehavior.Restrict);
+
+modelBuilder.Entity<Staff>()
+    .HasIndex(s => s.ApplicationUserId)
+    .IsUnique();
 
         // Preserve the existing ParentChild relationship.
         modelBuilder.Entity<ParentChild>()

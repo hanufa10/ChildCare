@@ -35,13 +35,24 @@ function Dashboard() {
                 setLoading(true);
                 setError("");
 
-                const [childrenRes, parentsRes, staffRes, mealsRes] =
-                    await Promise.all([
-                        fetch(`${API_URL}/Children`),
-                        fetch(`${API_URL}/Parent`),
-                        fetch(`${API_URL}/Staff`),
-                        fetch(`${API_URL}/Meal`),
-                    ]);
+                
+const token = localStorage.getItem("authToken");
+
+if (!token) {
+    throw new Error("No login token found. Please log in again.");
+}
+
+const headers = {
+    Authorization: `Bearer ${token}`,
+};
+
+const [childrenRes, parentsRes, staffRes, mealsRes] =
+    await Promise.all([
+        fetch(`${API_URL}/Children`, { headers }),
+        fetch(`${API_URL}/Parent`, { headers }),
+        fetch(`${API_URL}/Staff`, { headers }),
+        fetch(`${API_URL}/Meal`, { headers }),
+    ]);
 
                 if (
                     !childrenRes.ok ||

@@ -1,55 +1,193 @@
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import "../components/styles/AuthPage.css";
 
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import '../components/styles/AuthPage.css'
+const API_URL = "http://localhost:5165/api";
 
 function AuthPage() {
-  const [isSignup, setIsSignup] = useState(
-    window.location.pathname === '/signup'
-  )
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const [isSignup, setIsSignup] = useState(location.pathname === "/signup");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("error");
 
   const [loginData, setLoginData] = useState({
-    email: '',
-    password: '',
-  })
+    email: "",
+    password: "",
+  });
 
   const [signupData, setSignupData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    password: '',
-    confirmPassword: '',
-  })
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-  const handleLogin = (e) => {
-    e.preventDefault()
-    // We will connect this to the .NET login API next.
-  }
+  // Keep the displayed form in sync with the URL.
+  useEffect(() => {
+    setIsSignup(location.pathname === "/signup");
+    setMessage("");
+  }, [location.pathname]);
 
-  const handleSignup = (e) => {
-    e.preventDefault()
+  const showMessage = (text, type = "error") => {
+    setMessage(text);
+    setMessageType(type);
+  };
 
-    if (signupData.password !== signupData.confirmPassword) {
-      alert('Passwords do not match.')
-      return
+  const readError = async (response) => {
+    const data = await response.json().catch(() => null);
+
+    if (data?.errors) {
+      const errors = Object.values(data.errors).flat();
+      if (errors.length) return errors.join(" ");
     }
 
-    // Public signup will always create a Parent account.
-    // We will connect this to the .NET signup API next.
-  }
+    return (
+      data?.message ||
+      data?.title ||
+      data?.detail ||
+      "The request failed. Please try again."
+    );
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/Auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: loginData.email.trim(),
+          password: loginData.password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await readError(response));
+      }
+
+      const data = await response.json();
+
+      if (!data.token) {
+        throw new Error("Login succeeded, but the API did not return a token.");
+      }
+
+      const roles = Array.isArray(data.roles) ? data.roles : [];
+
+      // Keep the token and basic user details for this prototype.
+      // Never store the user's password.
+
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem(
+        "authUser",
+        JSON.stringify({
+          userId: data.userId,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          roles,
+        }),
+      );
+
+      // Notify App.jsx that login was successful
+      window.dispatchEvent(new Event("authChanged"));
+
+      if (roles.includes("Admin") || roles.includes("Staff")) {
+        navigate("/dashboard", { replace: true });
+      } else if (roles.includes("Parent")) {
+        navigate("/parent-dashboard", { replace: true });
+      } else {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("authUser");
+        window.dispatchEvent(new Event("authChanged"));
+
+        throw new Error("Your account does not have an assigned role.");
+      }
+    } catch (error) {
+      showMessage(
+        error instanceof TypeError
+          ? "Could not connect to the server. Make sure the backend is running."
+          : error.message,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setMessage("");
+
+    if (signupData.password !== signupData.confirmPassword) {
+      showMessage("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/Auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        // Do not send confirmPassword or a role.
+        // The backend assigns the Parent role.
+        body: JSON.stringify({
+          firstName: signupData.firstName.trim(),
+          lastName: signupData.lastName.trim(),
+          email: signupData.email.trim(),
+          phoneNumber: signupData.phoneNumber.trim() || null,
+          password: signupData.password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await readError(response));
+      }
+
+      showMessage(
+        "Your Parent account has been created. Please sign in.",
+        "success",
+      );
+
+      setSignupData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phoneNumber: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      navigate("/login", { replace: true });
+    } catch (error) {
+      showMessage(
+        error instanceof TypeError
+          ? "Could not connect to the server. Make sure the backend is running."
+          : error.message,
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const switchMode = (signup) => {
-    setIsSignup(signup)
-    window.history.replaceState(
-      null,
-      '',
-      signup ? '/signup' : '/login'
-    )
-  }
+    setMessage("");
+    navigate(signup ? "/signup" : "/login");
+  };
 
   return (
-    <div className={`auth-page ${isSignup ? 'signup-mode' : ''}`}>
+    <div className={`auth-page ${isSignup ? "signup-mode" : ""}`}>
       <div className="auth-card">
         <div className="auth-forms">
           {!isSignup ? (
@@ -63,6 +201,12 @@ function AuthPage() {
               <p className="auth-subtitle">
                 Sign in to continue caring for little ones.
               </p>
+
+              {message && (
+                <p className={`auth-message ${messageType}`} role="alert">
+                  {message}
+                </p>
+              )}
 
               <label htmlFor="login-email">Email address</label>
               <input
@@ -90,12 +234,12 @@ function AuthPage() {
                 }
               />
 
-              <button className="auth-submit" type="submit">
-                Sign In
+              <button className="auth-submit" type="submit" disabled={loading}>
+                {loading ? "Signing in..." : "Sign In"}
               </button>
 
               <p className="auth-switch-text">
-                Don't have an account?{' '}
+                Don't have an account?{" "}
                 <button type="button" onClick={() => switchMode(true)}>
                   Sign up
                 </button>
@@ -113,13 +257,18 @@ function AuthPage() {
                 Join our caring community of parents.
               </p>
 
+              {message && (
+                <p className={`auth-message ${messageType}`} role="alert">
+                  {message}
+                </p>
+              )}
+
               <div className="auth-name-row">
                 <div>
                   <label htmlFor="signup-first-name">First name</label>
                   <input
                     id="signup-first-name"
                     type="text"
-                    placeholder="First name"
                     autoComplete="given-name"
                     required
                     value={signupData.firstName}
@@ -137,7 +286,6 @@ function AuthPage() {
                   <input
                     id="signup-last-name"
                     type="text"
-                    placeholder="Last name"
                     autoComplete="family-name"
                     required
                     value={signupData.lastName}
@@ -155,7 +303,6 @@ function AuthPage() {
               <input
                 id="signup-email"
                 type="email"
-                placeholder="you@example.com"
                 autoComplete="email"
                 required
                 value={signupData.email}
@@ -168,7 +315,6 @@ function AuthPage() {
               <input
                 id="signup-phone"
                 type="tel"
-                placeholder="Phone number"
                 autoComplete="tel"
                 value={signupData.phoneNumber}
                 onChange={(e) =>
@@ -183,7 +329,6 @@ function AuthPage() {
               <input
                 id="signup-password"
                 type="password"
-                placeholder="Create a password"
                 autoComplete="new-password"
                 minLength={8}
                 required
@@ -193,13 +338,10 @@ function AuthPage() {
                 }
               />
 
-              <label htmlFor="signup-confirm-password">
-                Confirm password
-              </label>
+              <label htmlFor="signup-confirm-password">Confirm password</label>
               <input
                 id="signup-confirm-password"
                 type="password"
-                placeholder="Repeat your password"
                 autoComplete="new-password"
                 minLength={8}
                 required
@@ -212,12 +354,12 @@ function AuthPage() {
                 }
               />
 
-              <button className="auth-submit" type="submit">
-                Create Parent Account
+              <button className="auth-submit" type="submit" disabled={loading}>
+                {loading ? "Creating account..." : "Create Parent Account"}
               </button>
 
               <p className="auth-switch-text">
-                Already have an account?{' '}
+                Already have an account?{" "}
                 <button type="button" onClick={() => switchMode(false)}>
                   Sign in
                 </button>
@@ -232,11 +374,13 @@ function AuthPage() {
 
           <div className="welcome-content">
             <div className="welcome-heart">♡</div>
-            <h2>{isSignup ? 'Welcome back!' : 'Little smiles, big care.'}</h2>
+            <h2>
+              {isSignup ? "Welcome to our family!" : "Little smiles, big care."}
+            </h2>
             <p>
               {isSignup
-                ? 'Already part of our family? Sign in and continue your journey with Cuddle Care.'
-                : 'A safe, loving place where every child can learn, grow, and shine.'}
+                ? "Create your parent account and join our caring community."
+                : "A safe, loving place where every child can learn, grow, and shine."}
             </p>
 
             <div className="welcome-dots">
@@ -250,13 +394,13 @@ function AuthPage() {
               type="button"
               onClick={() => switchMode(!isSignup)}
             >
-              {isSignup ? 'Sign In' : 'Create an Account'}
+              {isSignup ? "Sign In" : "Create an Account"}
             </button>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default AuthPage
+export default AuthPage;

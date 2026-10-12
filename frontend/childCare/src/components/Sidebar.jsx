@@ -1,55 +1,86 @@
-import { Link } from 'react-router-dom';
-import {LayoutDashboard,Baby,Users,UserRound,Utensils,Plus, Heart} from 'lucide-react';
+
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Baby,
+  Users,
+  UserRound,
+  Utensils,
+  Plus,
+  Heart
+} from 'lucide-react';
+
 function Sidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Remove saved authentication information
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+
+    // Redirect to login page
+    window.location.replace('/login');
+  };
+
   return (
     <aside>
-      <div className='side-header'>
-        <div className='side-header-left'>
-        <Heart size={30}/>
-        <h2>
-          Child <span>Care</span>
-        </h2>
+      <div className="side-header">
+        <div className="side-header-left">
+          <Heart size={30} />
+          <h2>
+            Child <span>Care</span>
+          </h2>
         </div>
         <p>Management</p>
       </div>
+
       <nav>
         <ul>
           <li>
-            <LayoutDashboard size={25}/>
-            <Link to="/">Dashboard</Link>
-          </li>
+            <LayoutDashboard size={25} />
+<Link to="/dashboard">Dashboard</Link>          </li>
+
           <li>
-            <Baby size={25}/>
+            <Baby size={25} />
             <Link to="/children">Children</Link>
           </li>
+
           <li>
-            <UserRound size={25 }/>
+            <UserRound size={25} />
             <Link to="/parents">Parents</Link>
           </li>
+
           <li>
-            <Users size={25}/>
+            <Users size={25} />
             <Link to="/staff">Staff</Link>
           </li>
+
           <li>
-            <Utensils size={25}/>
+            <Utensils size={25} />
             <Link to="/meals">Meals</Link>
           </li>
-          {/* <li>
-            <Link to="/aboutus">About Us</Link>
-          </li> */}
+
           <li>
-            <Plus size={25}/>
+            <Plus size={25} />
             <Link to="/registration">Register Child</Link>
           </li>
         </ul>
       </nav>
-      <div className='bottom-profile'>
+
+      <div className="bottom-profile">
         <div></div>
-        <button className='add-button' style={{margin:"20px"}}>
+
+        <button
+          type="button"
+          className="add-button"
+          style={{ margin: '20px' }}
+          onClick={handleLogout}
+        >
           Logout
         </button>
       </div>
     </aside>
   );
 }
+
 export default Sidebar;

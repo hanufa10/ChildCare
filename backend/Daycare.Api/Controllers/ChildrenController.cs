@@ -1,5 +1,6 @@
 using Daycare.Api.Data;
 using Daycare.Api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace Daycare.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Staff")]
 public class ChildrenController : ControllerBase
 {
     private readonly DaycareDbContext _context;
@@ -64,10 +66,8 @@ public class ChildrenController : ControllerBase
             {
                 return NotFound();
             }
-            else
-            {
-                throw;
-            }
+
+            throw;
         }
 
         return NoContent();
@@ -77,6 +77,7 @@ public class ChildrenController : ControllerBase
     public async Task<IActionResult> DeleteChild(int id)
     {
         var child = await _context.Children.FindAsync(id);
+
         if (child == null)
         {
             return NotFound();

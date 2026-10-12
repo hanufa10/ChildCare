@@ -1,6 +1,10 @@
-
 import { useState, useRef, useEffect } from "react";
-import { Search, Bell, ChevronDown, Users, UserRound } from "lucide-react";
+import {
+    Search,
+    ChevronDown,
+    Users,
+    UserRound,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 function Header() {
@@ -78,7 +82,14 @@ function Header() {
             </div>
 
             <div className="header-right">
-                <Bell size={22} />
+                <Link
+                    to="/admin-users"
+                    className="header-user-link"
+                    title="User Management"
+                    aria-label="Open User Management"
+                >
+                    <UserRound size={24} />
+                </Link>
 
                 <div className="name-icon">HF</div>
 

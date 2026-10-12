@@ -32,31 +32,58 @@ function ChildrenAttendance() {
   const [error, setError] = useState("");
 
   // Load children and existing attendance records
-  async function loadData() {
-    setLoading(true);
-    setError("");
+async function loadData() {
+  setLoading(true);
+  setError("");
 
-    try {
-      const [childrenResponse, attendanceResponse] = await Promise.all([
-        fetch(`${API}/Children`),
-        fetch(`${API}/ChildAttendance`),
-      ]);
+  const token = localStorage.getItem("authToken");
 
-      if (!childrenResponse.ok || !attendanceResponse.ok) {
-        throw new Error("Could not load children or attendance records.");
-      }
-
-      const childrenData = await childrenResponse.json();
-      const attendanceData = await attendanceResponse.json();
-
-      setChildren(childrenData);
-      setAttendance(attendanceData);
-    } catch (err) {
-      setError(err.message || "Failed to load attendance data.");
-    } finally {
-      setLoading(false);
-    }
+  if (!token) {
+    setError("Your session has expired. Please log in again.");
+    setLoading(false);
+    return;
   }
+
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  try {
+    const [childrenResponse, attendanceResponse] = await Promise.all([
+      fetch(`${API}/Children`, { headers }),
+      fetch(`${API}/ChildAttendance`, { headers }),
+    ]);
+
+    if (
+      childrenResponse.status === 401 ||
+      attendanceResponse.status === 401
+    ) {
+      throw new Error("Your session has expired. Please log in again.");
+    }
+
+    if (!childrenResponse.ok) {
+      throw new Error(
+        `Failed to load children: ${childrenResponse.status}`
+      );
+    }
+
+    if (!attendanceResponse.ok) {
+      throw new Error(
+        `Failed to load attendance: ${attendanceResponse.status}`
+      );
+    }
+
+    const childrenData = await childrenResponse.json();
+    const attendanceData = await attendanceResponse.json();
+
+    setChildren(childrenData);
+    setAttendance(attendanceData);
+  } catch (err) {
+    setError(err.message || "Failed to load attendance data.");
+  } finally {
+    setLoading(false);
+  }
+}
 
   useEffect(() => {
     loadData();

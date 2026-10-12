@@ -36,24 +36,50 @@ function Children() {
   })
   const [deleteId,setDeleteId]=useState(null)
   // Get children
-  useEffect(() => {
-    Promise.all([
-      fetch('http://localhost:5165/api/Children')
-      .then(response => response.json()),
-      fetch('http://localhost:5165/api/ParentChildren')
-      .then(response => response.json())
-    ])
-    .then(([childrenData, relationshipsData]) => {
-      setChildren(childrenData)
-      setParentChildren(relationshipsData)
+
+useEffect(() => {
+  const token = localStorage.getItem("authToken");
+
+  if (!token) {
+    setError("Your session has expired. Please log in again.");
+    setLoading(false);
+    return;
+  }
+
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  Promise.all([
+    fetch("http://localhost:5165/api/Children", { headers }),
+    fetch("http://localhost:5165/api/ParentChildren", { headers }),
+  ])
+    .then(async ([childrenRes, relationshipsRes]) => {
+      if (childrenRes.status === 401 || relationshipsRes.status === 401) {
+        throw new Error("Your session has expired. Please log in again.");
+      }
+
+      if (!childrenRes.ok || !relationshipsRes.ok) {
+        throw new Error("Failed to load children or parent relationships.");
+      }
+
+      return Promise.all([
+        childrenRes.json(),
+        relationshipsRes.json(),
+      ]);
     })
-    .catch(error => {
-      setError(error.message)
+    .then(([childrenData, relationshipsData]) => {
+      setChildren(childrenData);
+      setParentChildren(relationshipsData);
+    })
+    .catch((error) => {
+      setError(error.message);
     })
     .finally(() => {
-      setLoading(false)
-    })
-}, [])
+      setLoading(false);
+    });
+}, []);
+
 
   // Search + filter
   const filteredChildren = children.filter(child => {
@@ -112,7 +138,8 @@ function Children() {
         {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
           body: JSON.stringify(newChild)
         }
@@ -153,7 +180,8 @@ function Children() {
         {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
           body: JSON.stringify({
             id: editingChild.id,
@@ -219,8 +247,11 @@ setError('')
     const response = await fetch(
       `http://localhost:5165/api/Children/${deleteId}`,
       {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
         method: 'DELETE'
-      }
+      },
     )
 
     if (!response.ok) {
