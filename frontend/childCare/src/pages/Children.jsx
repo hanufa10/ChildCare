@@ -325,8 +325,10 @@ setError('')
         </div>
 
         {/* Register button */}
-        <Link to="/registration" style={{textDecoration: "none"}}>
-        <button
+<Link
+  to="/dashboard/registration"
+  style={{ textDecoration: "none" }}
+>        <button
           className="register-child-button"
           
           >
@@ -675,7 +677,7 @@ setError('')
                     <div className="table-actions">
 
          <Link
-  to={`/children/${child.id}`}
+  to={`/dashboard/children/${child.id}`}
   className="icon-button"
   title="View child details"
   aria-label={`View ${child.firstName} ${child.lastName}`}

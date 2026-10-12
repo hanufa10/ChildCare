@@ -1,5 +1,12 @@
+
 import { useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+
 import "./App.css";
 
 import Sidebar from "./components/Sidebar";
@@ -23,6 +30,7 @@ import AdminUsers from "./pages/AdminUsers";
 import ParentDashboard from "./pages/ParentDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 
+// Read the logged-in user's information safely.
 function getAuthUser() {
   try {
     return JSON.parse(localStorage.getItem("authUser") || "null");
@@ -31,30 +39,59 @@ function getAuthUser() {
   }
 }
 
-
+// Admin dashboard layout and its nested pages.
 function DashboardLayout() {
   return (
     <>
       <Sidebar />
+
       <main>
         <Header />
+
         <div className="main-div">
           <Routes>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
+            {/* Show the dashboard directly at /dashboard */}
+            <Route index element={<Dashboard />} />
+
             <Route path="children" element={<Children />} />
+            <Route path="children/:id" element={<ChildDetails />} />
             <Route path="parents" element={<Parents />} />
             <Route path="staff" element={<Staff />} />
             <Route path="meals" element={<Meals />} />
-            <Route path="parent-children" element={<ParentChildren />} />
+
+            <Route
+              path="parent-children"
+              element={<ParentChildren />}
+            />
+
             <Route path="aboutus" element={<AboutUs />} />
             <Route path="registration" element={<Registration />} />
-            <Route path="children/:id" element={<ChildDetails />} />
-            <Route path="childrenAttendance" element={<ChildrenAttendance />} />
-            <Route path="staffAttendance" element={<StaffAttendance />} />
-            <Route path="dietary-needs" element={<DietaryNeeds />} />
-            <Route path="/admin-users" element={<AdminUsers />} />
-            <Route path="/staff-dashboard" element={<StaffDashboard />} />          
+
+            <Route
+              path="childrenAttendance"
+              element={<ChildrenAttendance />}
+            />
+
+            <Route
+              path="staffAttendance"
+              element={<StaffAttendance />}
+            />
+
+            <Route
+              path="dietary-needs"
+              element={<DietaryNeeds />}
+            />
+
+            <Route
+              path="admin-users"
+              element={<AdminUsers />}
+            />
+
+            {/* Unknown Admin pages return to the dashboard */}
+            <Route
+              path="*"
+              element={<Navigate to="/dashboard" replace />}
+            />
           </Routes>
         </div>
       </main>
@@ -62,14 +99,13 @@ function DashboardLayout() {
   );
 }
 
-
-
 function AppRoutes() {
   const [auth, setAuth] = useState(() => ({
     token: localStorage.getItem("authToken"),
     user: getAuthUser(),
   }));
 
+  // Keep authentication state synchronized after login/logout.
   useEffect(() => {
     const syncAuth = () => {
       setAuth({
@@ -89,10 +125,13 @@ function AppRoutes() {
 
   const isLoggedIn = Boolean(auth.token && auth.user);
   const roles = auth.user?.roles || [];
+
   const isAdmin = roles.includes("Admin");
   const isStaff = roles.includes("Staff");
   const isParent = roles.includes("Parent");
 
+  // Determine the correct landing page for each role.
+  // Admin takes priority if an account has multiple roles.
   let homeRoute = "/login";
 
   if (isAdmin) {
@@ -105,6 +144,7 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Login */}
       <Route
         path="/login"
         element={
@@ -116,6 +156,7 @@ function AppRoutes() {
         }
       />
 
+      {/* Public Parent signup */}
       <Route
         path="/signup"
         element={
@@ -127,7 +168,7 @@ function AppRoutes() {
         }
       />
 
-      {/* Admin dashboard and its existing pages */}
+      {/* Admin dashboard and management pages */}
       <Route
         path="/dashboard/*"
         element={
@@ -163,12 +204,10 @@ function AppRoutes() {
         }
       />
 
-      {/* Unknown routes */}
+      {/* Redirect unknown URLs to the appropriate home page */}
       <Route
         path="*"
-        element={
-          <Navigate to={homeRoute} replace />
-        }
+        element={<Navigate to={homeRoute} replace />}
       />
     </Routes>
   );

@@ -657,7 +657,7 @@ function Meals() {
           </p>
         </div>
 
-        <Link to="/dietary-needs" className="dietary-button">
+        <Link to="/dashboard/dietary-needs" className="dietary-button">
           View dietary needs
         </Link>
       </div>

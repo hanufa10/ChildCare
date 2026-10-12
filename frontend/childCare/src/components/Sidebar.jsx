@@ -1,5 +1,5 @@
 
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Baby,
@@ -7,19 +7,22 @@ import {
   UserRound,
   Utensils,
   Plus,
-  Heart
-} from 'lucide-react';
+  Heart,
+} from "lucide-react";
 
 function Sidebar() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
     // Remove saved authentication information
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('authUser');
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("authUser");
+
+    // Notify App.jsx that the user has logged out
+    window.dispatchEvent(new Event("authChanged"));
 
     // Redirect to login page
-    window.location.replace('/login');
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -31,6 +34,7 @@ function Sidebar() {
             Child <span>Care</span>
           </h2>
         </div>
+
         <p>Management</p>
       </div>
 
@@ -38,31 +42,32 @@ function Sidebar() {
         <ul>
           <li>
             <LayoutDashboard size={25} />
-<Link to="/dashboard">Dashboard</Link>          </li>
+            <Link to="/dashboard">Dashboard</Link>
+          </li>
 
           <li>
             <Baby size={25} />
-            <Link to="/children">Children</Link>
+            <Link to="/dashboard/children">Children</Link>
           </li>
 
           <li>
             <UserRound size={25} />
-            <Link to="/parents">Parents</Link>
+            <Link to="/dashboard/parents">Parents</Link>
           </li>
 
           <li>
             <Users size={25} />
-            <Link to="/staff">Staff</Link>
+            <Link to="/dashboard/staff">Staff</Link>
           </li>
 
           <li>
             <Utensils size={25} />
-            <Link to="/meals">Meals</Link>
+            <Link to="/dashboard/meals">Meals</Link>
           </li>
 
           <li>
             <Plus size={25} />
-            <Link to="/registration">Register Child</Link>
+            <Link to="/dashboard/registration">Register Child</Link>
           </li>
         </ul>
       </nav>
@@ -73,7 +78,7 @@ function Sidebar() {
         <button
           type="button"
           className="add-button"
-          style={{ margin: '20px' }}
+          style={{ margin: "20px" }}
           onClick={handleLogout}
         >
           Logout

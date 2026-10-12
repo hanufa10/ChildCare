@@ -75,9 +75,9 @@ function DietaryNeeds() {
     <div className="dietary-page">
       <div className="dietary-page-header">
         <div>
-          <Link to="/meals" className="dietary-back-link">
-            <ArrowLeft size={18} /> Back to meals
-          </Link>
+          <Link to="/dashboard/meals" className="dietary-back-link">
+          <ArrowLeft size={18} /> Back to meals
+        </Link>
           <h1>Children's Dietary Needs</h1>
           <p>
             Review allergies and health conditions before preparing or serving

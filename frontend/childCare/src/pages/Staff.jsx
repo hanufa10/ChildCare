@@ -60,9 +60,9 @@ function Staff() {
   // NAVIGATE TO USER REGISTRATION
   // =========================
 
-  const handleAddStaff = () => {
-    navigate("/admin-users");
-  };
+ const handleAddStaff = () => {
+  navigate("/dashboard/admin-users");
+};
 
   // =========================
   // EDIT STAFF
