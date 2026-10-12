@@ -340,6 +340,7 @@ function Staff() {
                 <th>NAME</th>
                 <th>GENDER</th>
                 <th>PHONE NUMBER</th>
+                <th>Email</th>
                 <th>POSITION</th>
                 <th>HIRE DATE</th>
                 <th>ACTIONS</th>
@@ -380,6 +381,10 @@ function Staff() {
 
                     <td className="staff-phoneNumber">
                       {staff.phoneNumber || "-"}
+                    </td>
+                    {/* EMAIL */}
+                    <td className="staff-email">
+                      {staff.email || "-"}
                     </td>
 
                     {/* POSITION */}
@@ -566,8 +571,24 @@ function Staff() {
                     }
                   />
                 </div>
+                
               </div>
+              
+              <div className="staff-form-field">
+                  <label>Email</label>
 
+                  <input
+                    type="email"
+                    value={editingStaff.email || ""}
+                    onChange={(e) =>
+                      setEditingStaff({
+                        ...editingStaff,
+                        email: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                
               <div className="staff-form-field">
                 <label>Position</label>
 
@@ -582,6 +603,7 @@ function Staff() {
                   }
                 />
               </div>
+              
 
               <div className="staff-form-field">
                 <label>Hire date</label>

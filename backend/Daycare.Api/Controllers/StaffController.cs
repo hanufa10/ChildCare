@@ -1,17 +1,26 @@
+
 using Daycare.Api.Data;
+using Daycare.Api.Identity;
 using Daycare.Api.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Daycare.Api.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
 public class StaffController : ControllerBase
 {
     private readonly DaycareDbContext _context;
-    public StaffController(DaycareDbContext context)
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public StaffController(
+        DaycareDbContext context,
+        UserManager<ApplicationUser> userManager)
     {
         _context = context;
+        _userManager = userManager;
     }
 
     [HttpGet]
@@ -26,9 +35,7 @@ public class StaffController : ControllerBase
         var staff = await _context.Staff.FindAsync(id);
 
         if (staff == null)
-        {
             return NotFound();
-        }
 
         return staff;
     }
@@ -39,34 +46,65 @@ public class StaffController : ControllerBase
         _context.Staff.Add(staff);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetStaff), new { id = staff.Id }, staff);
+        return CreatedAtAction(
+            nameof(GetStaff),
+            new { id = staff.Id },
+            staff);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutStaff(int id, Staff staff)
+    public async Task<IActionResult> PutStaff(int id, Staff updatedStaff)
     {
-        if (id != staff.Id)
+        if (id != updatedStaff.Id)
+            return BadRequest("The ID in the URL does not match the staff ID.");
+
+        var staff = await _context.Staff.FindAsync(id);
+
+        if (staff == null)
+            return NotFound("Staff member not found.");
+
+        if (string.IsNullOrWhiteSpace(updatedStaff.Email))
+            return BadRequest("Email is required.");
+
+        var newEmail = updatedStaff.Email.Trim();
+
+        // Synchronize the linked login account, if one exists.
+        if (!string.IsNullOrWhiteSpace(staff.ApplicationUserId))
         {
-            return BadRequest();
+            var user = await _userManager.FindByIdAsync(
+                staff.ApplicationUserId);
+
+            if (user == null)
+                return Conflict("The linked staff login account was not found.");
+
+            var emailOwner = await _userManager.FindByEmailAsync(newEmail);
+
+            if (emailOwner != null && emailOwner.Id != user.Id)
+                return Conflict("This email is already used by another account.");
+
+            var usernameOwner = await _userManager.FindByNameAsync(newEmail);
+
+            if (usernameOwner != null && usernameOwner.Id != user.Id)
+                return Conflict("This username is already used by another account.");
+
+            var emailResult = await _userManager.SetEmailAsync(user, newEmail);
+
+            if (!emailResult.Succeeded)
+                return BadRequest(emailResult.Errors);
+
+            var usernameResult = await _userManager.SetUserNameAsync(
+                user, newEmail);
+
+            if (!usernameResult.Succeeded)
+                return BadRequest(usernameResult.Errors);
         }
 
-        _context.Entry(staff).State = EntityState.Modified;
+        // Update the profile fields.
+        staff.FirstName = updatedStaff.FirstName;
+        staff.LastName = updatedStaff.LastName;
+        staff.Email = newEmail;
 
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!StaffExists(id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
+        await _context.SaveChangesAsync();
 
         return NoContent();
     }
@@ -75,19 +113,13 @@ public class StaffController : ControllerBase
     public async Task<IActionResult> DeleteStaff(int id)
     {
         var staff = await _context.Staff.FindAsync(id);
+
         if (staff == null)
-        {
             return NotFound();
-        }
 
         _context.Staff.Remove(staff);
         await _context.SaveChangesAsync();
 
         return NoContent();
-    }
-
-    private bool StaffExists(int id)
-    {
-        return _context.Staff.Any(e => e.Id == id);
     }
 }
