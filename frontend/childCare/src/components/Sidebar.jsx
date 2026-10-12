@@ -71,7 +71,10 @@ function Sidebar() {
           </li>
         </ul>
       </nav>
-
+          <div className="sd-sidebars-note">
+            <span>♡</span>
+            <p>Little steps make a big difference.</p>
+        </div>
       <div className="bottom-profile">
         <div></div>
 

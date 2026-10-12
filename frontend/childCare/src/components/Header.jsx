@@ -12,6 +12,17 @@ function Header() {
   const [attendanceOpen, setAttendanceOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  // Get the logged-in user's details
+  const authUser = JSON.parse(
+    localStorage.getItem("authUser") || "{}"
+  );
+
+  const adminName =
+    `${authUser.firstName || ""} ${authUser.lastName || ""}`.trim() ||
+    "Admin";
+
+  const adminEmail = authUser.email || "No email available";
+
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
@@ -43,9 +54,7 @@ function Header() {
           <button
             type="button"
             className="register-child-button attendance-trigger"
-            onClick={() =>
-              setAttendanceOpen((open) => !open)
-            }
+            onClick={() => setAttendanceOpen((open) => !open)}
             aria-expanded={attendanceOpen}
           >
             Attendance
@@ -93,11 +102,17 @@ function Header() {
           <UserRound size={24} />
         </Link>
 
-        <div className="name-icon">HF</div>
+        <div className="name-icon">
+          {(
+            `${authUser.firstName?.[0] || ""}${
+              authUser.lastName?.[0] || ""
+            }` || "AD"
+          ).toUpperCase()}
+        </div>
 
         <div className="profile-info">
-          <h4>Hanan Fatih</h4>
-          <p>Central Director</p>
+          <h5 style={{margin:"0px"}}>{adminName}</h5>
+          <p style={{margin:"0px"}}>{adminEmail}</p>
         </div>
       </div>
     </header>
