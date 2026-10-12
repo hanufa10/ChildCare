@@ -44,11 +44,10 @@ function Sidebar() {
         </ul>
       </nav>
       <div className='bottom-profile'>
-        <div className="name-icon">HF</div>
-                    <div className="profile-info">
-                        <h4>Hanan Fatih</h4>
-                        <p>hanan@gmail.com</p>
-                    </div>
+        <div></div>
+        <button className='add-button' style={{margin:"20px"}}>
+          Logout
+        </button>
       </div>
     </aside>
   );

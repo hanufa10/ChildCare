@@ -1,0 +1,358 @@
+
+.auth-page {
+  --auth-pink: #e77ca7;
+  --auth-dark-pink: #d95f91;
+  --auth-light-pink: #fff1f7;
+  --auth-text: #493743;
+
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: #fff8fb;
+  color: var(--auth-text);
+  font-family: inherit;
+}
+
+.auth-card {
+  width: min(100%, 1000px);
+  min-height: 610px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #fff;
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 18px 55px rgba(120, 60, 90, 0.13);
+}
+
+.auth-forms {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 42px;
+  min-width: 0;
+}
+
+.auth-form {
+  width: 100%;
+  max-width: 370px;
+  display: flex;
+  flex-direction: column;
+  animation: auth-fade-in 0.35s ease;
+}
+
+@keyframes auth-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  margin-bottom: 28px;
+  color: var(--auth-dark-pink);
+  text-decoration: none;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.auth-logo-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--auth-light-pink);
+  font-size: 25px;
+}
+
+.auth-form h1 {
+  margin: 0 0 9px;
+  font-size: clamp(25px, 3vw, 32px);
+  line-height: 1.2;
+}
+
+.auth-subtitle {
+  margin: 0 0 25px;
+  color: #8d7b88;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.auth-form label {
+  margin: 0 0 7px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.auth-form input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  margin-bottom: 17px;
+  border: 1px solid #eadde5;
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: var(--auth-text);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-form input:focus {
+  border-color: var(--auth-pink);
+  box-shadow: 0 0 0 3px rgba(231, 124, 167, 0.13);
+}
+
+.auth-form input::placeholder {
+  color: #b4a5af;
+}
+
+.auth-submit {
+  width: 100%;
+  border: 0;
+  border-radius: 11px;
+  padding: 14px;
+  background: var(--auth-pink);
+  color: #fff;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.auth-submit:hover {
+  background: var(--auth-dark-pink);
+  transform: translateY(-1px);
+}
+
+.auth-switch-text {
+  margin: 22px 0 0;
+  text-align: center;
+  color: #8d7b88;
+  font-size: 13px;
+}
+
+.auth-switch-text button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--auth-dark-pink);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.auth-name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.auth-name-row > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.signup-form .auth-logo {
+  margin-bottom: 18px;
+}
+
+.signup-form .auth-subtitle {
+  margin-bottom: 18px;
+}
+
+.signup-form input {
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.signup-form .auth-switch-text {
+  margin-top: 16px;
+}
+
+.auth-welcome-panel {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 40px;
+  background: linear-gradient(145deg, #f6a9c7, #df77a4 60%, #ce6396);
+  color: #fff;
+  text-align: center;
+  transition: background 0.4s ease;
+}
+
+.welcome-content {
+  position: relative;
+  z-index: 2;
+  max-width: 330px;
+}
+
+.welcome-heart {
+  width: 94px;
+  height: 94px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 28px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.17);
+  font-size: 57px;
+}
+
+.welcome-content h2 {
+  margin: 0 0 16px;
+  font-size: clamp(28px, 3vw, 37px);
+  line-height: 1.2;
+}
+
+.welcome-content p {
+  margin: 0 auto;
+  max-width: 300px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.welcome-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 26px 0;
+}
+
+.welcome-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.welcome-dots span:first-child {
+  width: 23px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.welcome-switch {
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 30px;
+  padding: 12px 27px;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.welcome-switch:hover {
+  background: #fff;
+  color: var(--auth-dark-pink);
+}
+
+.welcome-decoration {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.16);
+  line-height: 1;
+  user-select: none;
+}
+
+.decoration-one {
+  top: 7%;
+  left: 7%;
+  font-size: 130px;
+  transform: rotate(-15deg);
+}
+
+.decoration-two {
+  right: 5%;
+  bottom: 5%;
+  font-size: 160px;
+}
+
+.signup-mode .auth-welcome-panel {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.signup-mode .auth-forms {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.signup-mode .auth-card {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 760px) {
+  .auth-page {
+    padding: 16px;
+  }
+
+  .auth-card {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .auth-welcome-panel,
+  .signup-mode .auth-welcome-panel {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 260px;
+    padding: 28px 22px;
+  }
+
+  .auth-forms,
+  .signup-mode .auth-forms {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 30px 24px;
+  }
+
+  .welcome-heart {
+    width: 65px;
+    height: 65px;
+    margin-bottom: 15px;
+    font-size: 40px;
+  }
+
+  .welcome-content h2 {
+    font-size: 25px;
+  }
+
+  .welcome-content p {
+    font-size: 13px;
+  }
+
+  .welcome-dots {
+    margin: 16px 0;
+  }
+
+  .signup-mode .auth-welcome-panel {
+    grid-row: 1;
+  }
+
+  .signup-mode .auth-forms {
+    grid-row: 2;
+  }
+}
