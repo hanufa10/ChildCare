@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import "../components/styles/AdminUsers.css";
+import { apiFetch } from "../utils/apiFetch";
 
 const API = "http://localhost:5165/api/AdminUsers";
 

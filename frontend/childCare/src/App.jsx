@@ -18,7 +18,6 @@ import Parents from "./pages/Parents";
 import Staff from "./pages/Staff";
 import Meals from "./pages/Meals";
 import ParentChildren from "./pages/ParentChildren";
-import AboutUs from "./pages/AboutUs";
 import Registration from "./pages/Registration";
 import ChildDetails from "./pages/ChildDetails";
 import ChildrenAttendance from "./pages/ChildrenAttendance";
@@ -32,6 +31,8 @@ import Profile from "./pages/Profile";
 
 import ParentDashboard from "./pages/ParentDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
+
+import { logout } from './utils/auth'
 
 // Read the logged-in user's information safely.
 function getAuthUser() {
@@ -67,7 +68,6 @@ function DashboardLayout() {
               element={<ParentChildren />}
             />
 
-            <Route path="aboutus" element={<AboutUs />} />
             <Route path="registration" element={<Registration />} />
 
             <Route
@@ -111,7 +111,7 @@ function AppRoutes() {
     token: localStorage.getItem("authToken"),
     user: getAuthUser(),
   }));
-
+  
   // Keep authentication state synchronized after login/logout.
   useEffect(() => {
     const syncAuth = () => {
@@ -148,6 +148,44 @@ function AppRoutes() {
   } else if (isParent) {
     homeRoute = "/parent-dashboard";
   }
+  
+  // Automatically log out when a JWT expires.
+  useEffect(() => {
+    if (!auth.token) return;
+
+    const checkTokenExpiration = () => {
+      try {
+        const payloadPart = auth.token.split(".")[1];
+
+        if (!payloadPart) return;
+
+        const base64 = payloadPart
+          .replace(/-/g, "+")
+          .replace(/_/g, "/");
+
+        const payload = JSON.parse(atob(base64));
+
+        if (
+          payload.exp &&
+          Date.now() >= payload.exp * 1000
+        ) {
+          logout();
+        }
+      } catch {
+        // If the token cannot be decoded, the API must
+        // still validate it when a request is made.
+      }
+    };
+
+    checkTokenExpiration();
+
+    const intervalId = setInterval(
+      checkTokenExpiration,
+      15000
+    );
+
+    return () => clearInterval(intervalId);
+  }, [auth.token]);
 
   return (
     <Routes>
