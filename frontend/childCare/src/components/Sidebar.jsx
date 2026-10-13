@@ -8,6 +8,8 @@ import {
   Utensils,
   Plus,
   Heart,
+  Megaphone,
+  MessageCircle
 } from "lucide-react";
 
 function Sidebar() {
@@ -41,33 +43,41 @@ function Sidebar() {
       <nav>
         <ul>
           <li>
-            <LayoutDashboard size={25} />
+            <LayoutDashboard size={20} />
             <Link to="/dashboard">Dashboard</Link>
           </li>
 
           <li>
-            <Baby size={25} />
+            <Baby size={20} />
             <Link to="/dashboard/children">Children</Link>
           </li>
 
           <li>
-            <UserRound size={25} />
+            <UserRound size={20} />
             <Link to="/dashboard/parents">Parents</Link>
           </li>
 
           <li>
-            <Users size={25} />
+            <Users size={20} />
             <Link to="/dashboard/staff">Staff</Link>
           </li>
 
           <li>
-            <Utensils size={25} />
+            <Utensils size={20} />
             <Link to="/dashboard/meals">Meals</Link>
           </li>
 
           <li>
-            <Plus size={25} />
+            <Plus size={20} />
             <Link to="/dashboard/registration">Register Child</Link>
+          </li>
+          <li>
+            <Megaphone size={20}/>
+            <Link to="/dashboard/admin-announcements">Announcements</Link>
+          </li>
+          <li>
+            <UserRound size={20}/>
+            <Link to="/dashboard/admin-users">User Management</Link>
           </li>
         </ul>
       </nav>

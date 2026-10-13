@@ -26,6 +26,8 @@ import StaffAttendance from "./pages/StaffAttendance";
 import DietaryNeeds from "./pages/DietaryNeeds";
 import AuthPage from "./pages/AuthPage";
 import AdminUsers from "./pages/AdminUsers";
+import Announcements from "./pages/Announcements";
+import Complaints from "./pages/Complaints";
 
 import ParentDashboard from "./pages/ParentDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
@@ -92,6 +94,9 @@ function DashboardLayout() {
               path="*"
               element={<Navigate to="/dashboard" replace />}
             />
+
+            <Route path="admin-announcements" element={<Announcements />} />
+            <Route path="admin-complaints" element={<Complaints />} />
           </Routes>
         </div>
       </main>

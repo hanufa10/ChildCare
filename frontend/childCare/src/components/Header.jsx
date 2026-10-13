@@ -5,6 +5,7 @@ import {
   ChevronDown,
   Users,
   UserRound,
+  MessageCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -94,12 +95,12 @@ function Header() {
 
       <div className="header-right">
         <Link
-          to="/dashboard/admin-users"
+          to="/dashboard/admin-complaints"
           className="header-user-link"
-          title="User Management"
-          aria-label="Open User Management"
+          title="User Complaints"
+          aria-label="Open User Complaints"
         >
-          <UserRound size={24} />
+          <MessageCircle size={24} />
         </Link>
 
         <div className="name-icon">
