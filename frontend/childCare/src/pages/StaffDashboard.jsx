@@ -54,6 +54,8 @@ export default function StaffDashboard() {
 
   const [activePage, setActivePage] = useState("overview");
   const [children, setChildren] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+const [complaints, setComplaints] = useState([]);
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -87,35 +89,48 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
     async function loadDashboard() {
       setLoading(true);
       setError("");
+const results = await Promise.allSettled([
+  fetchApi("/Children", token),
+  fetchApi("/Meal", token),
+  fetchApi("/Announcements", token),
+  fetchApi("/Complaints", token),
+]);
 
-      const results = await Promise.allSettled([
-        fetchApi("/Children", token),
-        fetchApi("/Meal", token),
-      ]);
+if (cancelled) return;
 
-      if (cancelled) return;
+if (results[0].status === "fulfilled") {
+  setChildren(
+    Array.isArray(results[0].value) ? results[0].value : []
+  );
+}
 
-      if (results[0].status === "fulfilled") {
-        setChildren(
-          Array.isArray(results[0].value) ? results[0].value : []
-        );
-      }
+if (results[1].status === "fulfilled") {
+  setMeals(
+    Array.isArray(results[1].value) ? results[1].value : []
+  );
+}
 
-      if (results[1].status === "fulfilled") {
-        setMeals(
-          Array.isArray(results[1].value) ? results[1].value : []
-        );
-      }
+if (results[2].status === "fulfilled") {
+  setAnnouncements(
+    Array.isArray(results[2].value) ? results[2].value : []
+  );
+}
 
-      const failures = results
-        .filter((result) => result.status === "rejected")
-        .map((result) => result.reason?.message || "Unable to load data.");
+if (results[3].status === "fulfilled") {
+  setComplaints(
+    Array.isArray(results[3].value) ? results[3].value : []
+  );
+}
 
-      if (failures.length) {
-        setError(failures.join(" "));
-      }
+const failures = results
+  .filter((result) => result.status === "rejected")
+  .map((result) => result.reason?.message || "Unable to load data.");
 
-      setLoading(false);
+if (failures.length) {
+  setError(failures.join(" "));
+}
+
+setLoading(false);
     }
 
     loadDashboard();
@@ -148,6 +163,128 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
     window.dispatchEvent(new Event("authChanged"));
     navigate("/login", { replace: true });
   }
+function renderAnnouncements() {
+  return (
+    <section className="sd-panel">
+      <div className="sd-panel-heading">
+        <div>
+          <h1>Announcements</h1>
+          <p>Stay informed about daycare news and important updates.</p>
+        </div>
+
+        <span className="sd-count-badge">
+          {announcements.length} announcements
+        </span>
+      </div>
+
+      {loading ? (
+        <p className="sd-muted">Loading announcements...</p>
+      ) : announcements.length === 0 ? (
+        <div className="sd-empty-state">
+          <span>📢</span>
+          <p>No announcements have been published yet.</p>
+        </div>
+      ) : (
+        <div className="sd-meal-list">
+          {[...announcements]
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt || 0) -
+                new Date(a.createdAt || 0)
+            )
+            .map((announcement) => (
+              <article
+                className="sd-meal-row"
+                key={announcement.id}
+              >
+                <div className="sd-meal-icon">📢</div>
+
+                <div className="sd-meal-info">
+                  <strong>{announcement.title}</strong>
+
+                  <span>
+                    Published: {formatDate(announcement.createdAt)}
+                  </span>
+
+                  <p>{announcement.message}</p>
+                </div>
+              </article>
+            ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function renderComplaints() {
+  return (
+    <section className="sd-panel">
+      <div className="sd-panel-heading">
+        <div>
+          <h1>Complaints</h1>
+          <p>Review complaints submitted to the daycare.</p>
+        </div>
+
+        <span className="sd-count-badge">
+          {complaints.length} complaints
+        </span>
+      </div>
+
+      {loading ? (
+        <p className="sd-muted">Loading complaints...</p>
+      ) : complaints.length === 0 ? (
+        <div className="sd-empty-state">
+          <span>💬</span>
+          <p>No complaints have been submitted yet.</p>
+        </div>
+      ) : (
+        <div className="sd-table-wrapper">
+          <table className="sd-table">
+            <thead>
+              <tr>
+                <th>Subject</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Admin Response</th>
+                <th>Date Submitted</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {[...complaints]
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt || 0) -
+                    new Date(a.createdAt || 0)
+                )
+                .map((complaint) => (
+                  <tr key={complaint.id}>
+                    <td className="sd-table-name">
+                      {complaint.subject}
+                    </td>
+
+                    <td>{complaint.description}</td>
+
+                    <td>
+                      <span className="sd-meal-type">
+                        {complaint.status || "Pending"}
+                      </span>
+                    </td>
+
+                    <td>
+                      {complaint.adminResponse || "No response yet"}
+                    </td>
+
+                    <td>{formatDate(complaint.createdAt)}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  );
+}
 
   function renderOverview() {
     return (
@@ -426,13 +563,18 @@ const [isEditingProfile, setIsEditingProfile] = useState(false);
   attendance: "Attendance",
   meals: "Meal Schedule",
   profile: "My Profile",
+  announcements: "Announcements",
+complaints: "Complaints",
 };
+
 
 const pageContent = {
   overview: renderOverview,
   children: renderChildren,
   attendance: renderAttendance,
   meals: renderMeals,
+  announcements: renderAnnouncements,
+  complaints: renderComplaints,
   profile: renderProfile,
 };
 
@@ -441,8 +583,10 @@ const navigation = [
   { id: "children", icon: "♡", label: "Children" },
   { id: "attendance", icon: "✓", label: "Attendance" },
   { id: "meals", icon: "✿", label: "Meal Schedule" },
-  { id: "profile", icon: "♙", label: "My Profile" },
+  { id: "announcements", icon: "📢", label: "Announcements" },
+  { id: "complaints", icon: "💬", label: "Complaints" },
 ];
+
 
   return (
     <div className="sd-layout">
@@ -452,16 +596,6 @@ const navigation = [
           <div>
             <h2>Cuddle Care</h2>
             <p>Staff Portal</p>
-          </div>
-        </div>
-
-        <div className="sd-profile">
-          <div className="sd-profile-avatar">
-            {staffName.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <strong>{staffName}</strong>
-            <span>Staff Member</span>
           </div>
         </div>
 
@@ -514,9 +648,18 @@ const navigation = [
                 year: "numeric",
               })}
             </div>
-            <div className="sd-topbar-avatar">
+             <button
+              type="button"
+              className="sd-topbar-avatar"
+              onClick={() => {
+                setProfileMessage("");
+                setActivePage("profile");
+              }}
+              aria-label="Open My Profile"
+              title="My Profile"
+            >
               {staffName.charAt(0).toUpperCase()}
-            </div>
+            </button>
           </div>
         </header>
 
