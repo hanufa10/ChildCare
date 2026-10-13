@@ -15,6 +15,28 @@ namespace Daycare.Api.Controllers
         {
             _context = context;
         }
+// GET: api/Complaints/mine
+[HttpGet("mine")]
+public async Task<ActionResult<IEnumerable<Complaint>>> GetMyComplaints()
+{
+    var userId = User.FindFirst(
+        System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Unauthorized(new
+        {
+            message = "Unable to identify the logged-in user."
+        });
+    }
+
+    var complaints = await _context.Complaints
+        .Where(c => c.SubmittedByUserId == userId)
+        .OrderByDescending(c => c.CreatedAt)
+        .ToListAsync();
+
+    return Ok(complaints);
+}
 
         // GET: api/Complaints
         [HttpGet]
@@ -39,22 +61,39 @@ namespace Daycare.Api.Controllers
             return complaint;
         }
 
-        // POST: api/Complaints
-        [HttpPost]
-        public async Task<ActionResult<Complaint>> PostComplaint(Complaint complaint)
+        
+// POST: api/Complaints
+[HttpPost]
+public async Task<ActionResult<Complaint>> PostComplaint(
+    Complaint complaint)
+{
+    var userId = User.FindFirst(
+        System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+    if (string.IsNullOrEmpty(userId))
+    {
+        return Unauthorized(new
         {
-            complaint.Id = 0;
-            complaint.CreatedAt = DateTime.UtcNow;
-            complaint.Status = "Pending";
+            message = "Unable to identify the logged-in user."
+        });
+    }
 
-            _context.Complaints.Add(complaint);
-            await _context.SaveChangesAsync();
+    complaint.Id = 0;
+    complaint.SubmittedByUserId = userId;
+    complaint.CreatedAt = DateTime.UtcNow;
+    complaint.UpdatedAt = null;
+    complaint.Status = "Pending";
+    complaint.AdminResponse = null;
 
-            return CreatedAtAction(
-                nameof(GetComplaint),
-                new { id = complaint.Id },
-                complaint);
-        }
+    _context.Complaints.Add(complaint);
+    await _context.SaveChangesAsync();
+
+    return CreatedAtAction(
+        nameof(GetComplaint),
+        new { id = complaint.Id },
+        complaint);
+}
+
 
         // PUT: api/Complaints/5
         [HttpPut("{id}")]
@@ -99,5 +138,6 @@ namespace Daycare.Api.Controllers
 
             return NoContent();
         }
+        
     }
 }

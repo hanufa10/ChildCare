@@ -1,10 +1,7 @@
-
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "../components/styles/ParentDashboard.css";
 
-
 const API_URL = "http://localhost:5165/api";
-
 
 const navItems = [
   { id: "overview", label: "Overview", icon: "⌂" },
@@ -12,6 +9,7 @@ const navItems = [
   { id: "meals", label: "Meal Schedule", icon: "♨" },
   { id: "attendance", label: "Attendance", icon: "✓" },
   { id: "announcements", label: "Announcements", icon: "♧" },
+  { id: "complaints", label: "Complaints", icon: "💬" },
 ];
 
 const mealTypeLabels = {
@@ -107,7 +105,6 @@ function getLocalDateString(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-
 async function fetchApi(path, token, options = {}) {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
@@ -119,30 +116,51 @@ async function fetchApi(path, token, options = {}) {
     },
   });
 
+  
   if (!response.ok) {
     let message = `Request failed (${response.status}).`;
 
     try {
       const errorBody = await response.json();
-      message =
-        errorBody.message ||
-        errorBody.title ||
-        errorBody.detail ||
-        message;
+
+      if (errorBody.errors) {
+        message = Object.entries(errorBody.errors)
+          .map(([field, messages]) => {
+            const details = Array.isArray(messages)
+              ? messages.join(", ")
+              : String(messages);
+
+            return `${field}: ${details}`;
+          })
+          .join("\n");
+      } else {
+        message =
+          errorBody.message ||
+          errorBody.title ||
+          errorBody.detail ||
+          message;
+      }
     } catch {
-      // The API may return an empty or non-JSON error response.
+      // The API may return an empty or non-JSON response.
     }
 
     if (response.status === 401) {
       message = "Your session may have expired. Please log in again.";
     } else if (response.status === 403) {
-      message = "You do not have permission to update this child.";
+      message = "You do not have permission to perform this action.";
     } else if (response.status === 404) {
       message = "The requested API endpoint was not found.";
     }
 
+    console.error("API request failed:", {
+      path,
+      status: response.status,
+      message,
+    });
+
     throw new Error(message);
   }
+
 
   if (response.status === 204) return null;
 
@@ -154,10 +172,20 @@ async function fetchApi(path, token, options = {}) {
   return null;
 }
 
-
 function ParentDashboard() {
   const [activePage, setActivePage] = useState("overview");
   const [selectedDate, setSelectedDate] = useState("all");
+  
+  const [user] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("authUser") || "null");
+    } catch {
+      return null;
+    }
+  });
+
+  const token = localStorage.getItem("authToken");
+
 
   const [children, setChildren] = useState([]);
   const [meals, setMeals] = useState([]);
@@ -170,28 +198,27 @@ function ParentDashboard() {
 
   const [refreshKey, setRefreshKey] = useState(0);
 
+  const [editingChild, setEditingChild] = useState(null);
+  const [savingChild, setSavingChild] = useState(false);
+  const [editError, setEditError] = useState("");
+  const [editSuccess, setEditSuccess] = useState("");
+
+  const [announcements, setAnnouncements] = useState([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(true);
+  const [announcementsError, setAnnouncementsError] = useState("");
+
+  const [complaints, setComplaints] = useState([]);
+  const [complaintsLoading, setComplaintsLoading] = useState(true);
+  const [complaintsError, setComplaintsError] = useState("");
+
+  const [complaintSubject, setComplaintSubject] = useState("");
+  const [complaintDescription, setComplaintDescription] = useState("");
+  const [complaintSubmitting, setComplaintSubmitting] = useState(false);
+  const [complaintSuccess, setComplaintSuccess] = useState("");
+
   
-const [editingChild, setEditingChild] = useState(null);
-const [savingChild, setSavingChild] = useState(false);
-const [editError, setEditError] = useState("");
-const [editSuccess, setEditSuccess] = useState("");
-
-  const [user] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("authUser") || "null");
-    } catch {
-      return null;
-    }
-  });
-
-  const token = localStorage.getItem("authToken");
-
   const parentName =
-    user?.firstName ||
-    user?.FirstName ||
-    user?.name ||
-    user?.Name ||
-    "Parent";
+    user?.firstName || user?.FirstName || user?.name || user?.Name || "Parent";
 
   const loadChildren = useCallback(async () => {
     setChildrenLoading(true);
@@ -214,7 +241,7 @@ const [editSuccess, setEditSuccess] = useState("");
       // more than one relationship record for the same child.
       const uniqueChildren = [
         ...new Map(
-          actualChildren.map((child) => [getChildId(child), child])
+          actualChildren.map((child) => [getChildId(child), child]),
         ).values(),
       ];
 
@@ -222,12 +249,36 @@ const [editSuccess, setEditSuccess] = useState("");
     } catch (error) {
       setChildren([]);
       setChildrenError(
-        error.message || "Unable to load children's information."
+        error.message || "Unable to load children's information.",
       );
     } finally {
       setChildrenLoading(false);
     }
   }, [token]);
+  const loadAnnouncements = useCallback(async () => {
+  setAnnouncementsLoading(true);
+  setAnnouncementsError("");
+
+  try {
+    if (!token) {
+      throw new Error("Please log in to view announcements.");
+    }
+
+    const data = await fetchApi("/Announcements", token);
+    setAnnouncements(Array.isArray(data) ? data : []);
+  } catch (error) {
+    setAnnouncements([]);
+    setAnnouncementsError(
+      error.message || "Unable to load announcements."
+    );
+  } finally {
+    setAnnouncementsLoading(false);
+  }
+}, [token]);
+useEffect(() => {
+  loadAnnouncements();
+}, [loadAnnouncements, refreshKey]);
+
 
   const loadMeals = useCallback(async () => {
     setMealsLoading(true);
@@ -258,7 +309,7 @@ const [editSuccess, setEditSuccess] = useState("");
       if (dateA !== dateB) return dateA.localeCompare(dateB);
 
       return getMealType(getValue(a, "type", "Type")).localeCompare(
-        getMealType(getValue(b, "type", "Type"))
+        getMealType(getValue(b, "type", "Type")),
       );
     });
   }, [meals]);
@@ -271,7 +322,7 @@ const [editSuccess, setEditSuccess] = useState("");
             const date = getValue(meal, "date", "Date");
             return date ? String(date).slice(0, 10) : "";
           })
-          .filter(Boolean)
+          .filter(Boolean),
       ),
     ].sort();
   }, [sortedMeals]);
@@ -282,7 +333,7 @@ const [editSuccess, setEditSuccess] = useState("");
     return sortedMeals.filter(
       (meal) =>
         String(getValue(meal, "date", "Date") || "").slice(0, 10) ===
-        selectedDate
+        selectedDate,
     );
   }, [selectedDate, sortedMeals]);
 
@@ -300,7 +351,7 @@ const [editSuccess, setEditSuccess] = useState("");
   const todayMeals = useMemo(() => {
     return sortedMeals.filter(
       (meal) =>
-        String(getValue(meal, "date", "Date") || "").slice(0, 10) === today
+        String(getValue(meal, "date", "Date") || "").slice(0, 10) === today,
     );
   }, [sortedMeals, today]);
 
@@ -341,7 +392,9 @@ const [editSuccess, setEditSuccess] = useState("");
 
   const renderEmpty = (message) => (
     <div className="pc-empty">
-      <span className="pc-empty-icon" aria-hidden="true">🌿</span>
+      <span className="pc-empty-icon" aria-hidden="true">
+        🌿
+      </span>
       <p>{message}</p>
     </div>
   );
@@ -368,7 +421,10 @@ const [editSuccess, setEditSuccess] = useState("");
             getValue(meal, "description", "Description") || "";
 
           return (
-            <article className="pc-meal-item" key={id ?? `${date}-${type}-${name}`}>
+            <article
+              className="pc-meal-item"
+              key={id ?? `${date}-${type}-${name}`}
+            >
               <div className="pc-meal-icon" aria-hidden="true">
                 {mealTypeIcons[type] || "🍽️"}
               </div>
@@ -393,8 +449,8 @@ const [editSuccess, setEditSuccess] = useState("");
           <p className="pc-eyebrow">YOUR FAMILY PORTAL</p>
           <h2>Welcome back, {parentName}! 👋</h2>
           <p>
-            Stay connected with your children's information, meal schedules,
-            and important daycare updates.
+            Stay connected with your children's information, meal schedules, and
+            important daycare updates.
           </p>
           <button
             className="pc-button pc-button-primary pc-hero-button"
@@ -403,7 +459,9 @@ const [editSuccess, setEditSuccess] = useState("");
             View my children →
           </button>
         </div>
-        <div className="pc-hero-illustration" aria-hidden="true">🧸</div>
+        <div className="pc-hero-illustration" aria-hidden="true">
+          🧸
+        </div>
       </section>
 
       <section className="pc-stats-grid" aria-label="Dashboard summary">
@@ -440,7 +498,8 @@ const [editSuccess, setEditSuccess] = useState("");
               : mealsError
                 ? "Unavailable"
                 : nextMeal
-                  ? getValue(nextMeal, "name", "Name") || getMealType(getValue(nextMeal, "type", "Type"))
+                  ? getValue(nextMeal, "name", "Name") ||
+                    getMealType(getValue(nextMeal, "type", "Type"))
                   : "Not scheduled"}
           </p>
           <p className="pc-stat-detail">
@@ -485,7 +544,9 @@ const [editSuccess, setEditSuccess] = useState("");
 
                 return (
                   <div className="pc-child-summary" key={id}>
-                    <div className="pc-child-avatar" aria-hidden="true">👧</div>
+                    <div className="pc-child-avatar" aria-hidden="true">
+                      👧
+                    </div>
                     <div className="pc-child-info">
                       <h4>{name}</h4>
                       <p>
@@ -516,9 +577,7 @@ const [editSuccess, setEditSuccess] = useState("");
             </button>
           </div>
 
-          <p className="pc-muted pc-section-description">
-            {formatDate(today)}
-          </p>
+          <p className="pc-muted pc-section-description">{formatDate(today)}</p>
 
           {renderMealList(todayMeals)}
         </article>
@@ -526,7 +585,7 @@ const [editSuccess, setEditSuccess] = useState("");
         <article className={styles.card}>
           <h3 className={styles.sectionTitle}>Latest Announcements</h3>
           {renderEmpty(
-            "Announcements will appear here when an announcements API is available."
+            "Announcements will appear here when an announcements API is available.",
           )}
           <button
             className="pc-button pc-button-secondary"
@@ -539,83 +598,77 @@ const [editSuccess, setEditSuccess] = useState("");
     </>
   );
 
-  
-const openEditChild = (child) => {
-  setEditingChild({
-    id: getChildId(child),
-    firstName: getValue(child, "firstName", "FirstName") || "",
-    lastName: getValue(child, "lastName", "LastName") || "",
-    dateOfBirth: String(
-      getDateOfBirth(child) || ""
-    ).slice(0, 10),
-    gender: getValue(child, "gender", "Gender") || "",
-    allergies: getValue(child, "allergies", "Allergies") || "",
-    healthCondition:
-      getValue(child, "healthCondition", "HealthCondition") || "",
-  });
-
-  setEditError("");
-  setEditSuccess("");
-};
-
-const handleEditFieldChange = (event) => {
-  const { name, value } = event.target;
-
-  setEditingChild((current) => ({
-    ...current,
-    [name]: value,
-  }));
-};
-
-const saveChildChanges = async (event) => {
-  event.preventDefault();
-
-  if (!editingChild || savingChild) return;
-
-  setSavingChild(true);
-  setEditError("");
-  setEditSuccess("");
-
-  try {
-    if (!token) {
-      throw new Error("Please log in again before saving changes.");
-    }
-
-    const childId = editingChild.id;
-
-    // Match these property names to your C# Child model.
-    const payload = {
-      id: childId,
-      firstName: editingChild.firstName.trim(),
-      lastName: editingChild.lastName.trim(),
-      dateOfBirth: editingChild.dateOfBirth,
-      gender: editingChild.gender,
-      allergies: editingChild.allergies.trim(),
-      healthCondition: editingChild.healthCondition.trim(),
-    };
-
-    await fetchApi(`/Children/${childId}`, token, {
-      method: "PUT",
-      body: JSON.stringify(payload),
+  const openEditChild = (child) => {
+    setEditingChild({
+      id: getChildId(child),
+      firstName: getValue(child, "firstName", "FirstName") || "",
+      lastName: getValue(child, "lastName", "LastName") || "",
+      dateOfBirth: String(getDateOfBirth(child) || "").slice(0, 10),
+      gender: getValue(child, "gender", "Gender") || "",
+      allergies: getValue(child, "allergies", "Allergies") || "",
+      healthCondition:
+        getValue(child, "healthCondition", "HealthCondition") || "",
     });
 
-    setChildren((current) =>
-      current.map((child) =>
-        getChildId(child) === childId
-          ? { ...child, ...payload }
-          : child
-      )
-    );
+    setEditError("");
+    setEditSuccess("");
+  };
 
-    setEditingChild(null);
-    setEditSuccess("Child information updated successfully.");
+  const handleEditFieldChange = (event) => {
+    const { name, value } = event.target;
 
-  } catch (error) {
-    setEditError(error.message || "Unable to save child information.");
-  } finally {
-    setSavingChild(false);
-  }
-};
+    setEditingChild((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const saveChildChanges = async (event) => {
+    event.preventDefault();
+
+    if (!editingChild || savingChild) return;
+
+    setSavingChild(true);
+    setEditError("");
+    setEditSuccess("");
+
+    try {
+      if (!token) {
+        throw new Error("Please log in again before saving changes.");
+      }
+
+      const childId = editingChild.id;
+
+      // Match these property names to your C# Child model.
+      const payload = {
+        id: childId,
+        firstName: editingChild.firstName.trim(),
+        lastName: editingChild.lastName.trim(),
+        dateOfBirth: editingChild.dateOfBirth,
+        gender: editingChild.gender,
+        allergies: editingChild.allergies.trim(),
+        healthCondition: editingChild.healthCondition.trim(),
+      };
+
+      await fetchApi(`/Children/${childId}`, token, {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      });
+
+      setChildren((current) =>
+        current.map((child) =>
+          getChildId(child) === childId ? { ...child, ...payload } : child,
+        ),
+      );
+
+      setEditingChild(null);
+      setEditSuccess("Child information updated successfully.");
+    } catch (error) {
+      setEditError(error.message || "Unable to save child information.");
+    } finally {
+      setSavingChild(false);
+    }
+  };
 
   const renderChildren = () => (
     <section className="pc-children-page">
@@ -644,21 +697,20 @@ const saveChildChanges = async (event) => {
         <div className="pc-children-details-list">
           {children.map((child) => {
             const id = getChildId(child);
-            const firstName =
-              getValue(child, "firstName", "FirstName") || "";
-            const lastName =
-              getValue(child, "lastName", "LastName") || "";
+            const firstName = getValue(child, "firstName", "FirstName") || "";
+            const lastName = getValue(child, "lastName", "LastName") || "";
             const name = getChildName(child);
             const dob = getDateOfBirth(child);
             const age = calculateAge(dob);
             const gender =
               getValue(child, "gender", "Gender") || "Not provided";
-            const allergies =
-              getValue(child, "allergies", "Allergies");
-            const healthCondition =
-              getValue(child, "healthCondition", "HealthCondition");
-            const createdDate =
-              getValue(child, "createdDate", "CreatedDate");
+            const allergies = getValue(child, "allergies", "Allergies");
+            const healthCondition = getValue(
+              child,
+              "healthCondition",
+              "HealthCondition",
+            );
+            const createdDate = getValue(child, "createdDate", "CreatedDate");
 
             return (
               <article className="pc-child-detail-card" key={id}>
@@ -668,9 +720,7 @@ const saveChildChanges = async (event) => {
                   </div>
 
                   <div className="pc-child-detail-heading">
-                    <span className="pc-child-detail-label">
-                      CHILD PROFILE
-                    </span>
+                    <span className="pc-child-detail-label">CHILD PROFILE</span>
                     <h3>{name}</h3>
                     <p>
                       {age == null
@@ -679,20 +729,18 @@ const saveChildChanges = async (event) => {
                     </p>
                   </div>
 
-                  
-<div className="pc-child-id">
-  <span>Registration ID</span>
-  <strong>#{id}</strong>
+                  <div className="pc-child-id">
+                    <span>Registration ID</span>
+                    <strong>#{id}</strong>
 
-  <button
-    type="button"
-    className="pc-button pc-button-primary pc-edit-child-button"
-    onClick={() => openEditChild(child)}
-  >
-    ✎ Edit Details
-  </button>
-</div>
-
+                    <button
+                      type="button"
+                      className="pc-button pc-button-primary pc-edit-child-button"
+                      onClick={() => openEditChild(child)}
+                    >
+                      ✎ Edit Details
+                    </button>
+                  </div>
                 </div>
 
                 <div className="pc-child-detail-section">
@@ -714,9 +762,7 @@ const saveChildChanges = async (event) => {
 
                     <div className="pc-detail-field">
                       <span>Date of Birth</span>
-                      <strong>
-                        {dob ? formatDate(dob) : "Not provided"}
-                      </strong>
+                      <strong>{dob ? formatDate(dob) : "Not provided"}</strong>
                     </div>
 
                     <div className="pc-detail-field">
@@ -758,8 +804,7 @@ const saveChildChanges = async (event) => {
                       <div>
                         <span>Allergies</span>
                         <p>
-                          {allergies &&
-                          String(allergies).trim().length > 0
+                          {allergies && String(allergies).trim().length > 0
                             ? String(allergies)
                             : "No allergy information provided"}
                         </p>
@@ -790,15 +835,12 @@ const saveChildChanges = async (event) => {
     </section>
   );
 
-
   const renderMeals = () => (
     <section className={styles.card}>
       <div className="pc-card-heading pc-meal-page-heading">
         <div>
           <h2 className={styles.sectionTitle}>Meal Schedule</h2>
-          <p className="pc-muted">
-            View the meals scheduled by your daycare.
-          </p>
+          <p className="pc-muted">View the meals scheduled by your daycare.</p>
         </div>
 
         <label className="pc-date-filter">
@@ -829,17 +871,19 @@ const saveChildChanges = async (event) => {
           {Object.entries(
             filteredMeals.reduce((groups, meal) => {
               const date = String(
-                getValue(meal, "date", "Date") || "unknown"
+                getValue(meal, "date", "Date") || "unknown",
               ).slice(0, 10);
 
               if (!groups[date]) groups[date] = [];
               groups[date].push(meal);
 
               return groups;
-            }, {})
+            }, {}),
           ).map(([date, dateMeals]) => (
             <section className="pc-meal-date-group" key={date}>
-              <h3>{date === "unknown" ? "Date not available" : formatDate(date)}</h3>
+              <h3>
+                {date === "unknown" ? "Date not available" : formatDate(date)}
+              </h3>
               {renderMealList(dateMeals)}
             </section>
           ))}
@@ -866,23 +910,225 @@ const saveChildChanges = async (event) => {
     </section>
   );
 
-  const renderAnnouncements = () => (
-    <section className={styles.card}>
-      <h2 className={styles.sectionTitle}>Announcements</h2>
-      <p className="pc-muted pc-section-description">
-        Important updates from your daycare.
-      </p>
 
-      <div className="pc-feature-placeholder">
-        <span aria-hidden="true">📣</span>
-        <h3>Announcements are not connected yet</h3>
-        <p>
-          Once an announcements API is added to your backend, real daycare
-          updates can be displayed here.
-        </p>
+const renderAnnouncements = () => (
+  <section className={styles.card}>
+    <h2 className={styles.sectionTitle}>Announcements</h2>
+    <p className="pc-muted pc-section-description">
+      Important updates and messages from your daycare.
+    </p>
+
+    {announcementsLoading ? (
+      renderLoading("Loading announcements...")
+    ) : announcementsError ? (
+      renderError(announcementsError, loadAnnouncements)
+    ) : announcements.length === 0 ? (
+      renderEmpty("There are no announcements available right now.")
+    ) : (
+      <div className="pc-announcements-list">
+        {announcements.map((announcement) => {
+          const id = getValue(announcement, "id", "Id");
+          const title =
+            getValue(announcement, "title", "Title") ||
+            "Untitled announcement";
+          const message =
+            getValue(announcement, "message", "Message") || "";
+          const createdAt = getValue(
+            announcement,
+            "createdAt",
+            "CreatedAt"
+          );
+
+          return (
+            <article className="pc-announcement-card" key={id}>
+              <div className="pc-announcement-icon" aria-hidden="true">
+                📣
+              </div>
+
+              <div className="pc-announcement-content">
+                <h3>{title}</h3>
+                <p className="pc-announcement-date">
+                  {formatDate(createdAt)}
+                </p>
+                <p className="pc-announcement-message">{message}</p>
+              </div>
+            </article>
+          );
+        })}
       </div>
-    </section>
-  );
+    )}
+  </section>
+);
+
+const loadComplaints = useCallback(async () => {
+  setComplaintsLoading(true);
+  setComplaintsError("");
+
+  try {
+    if (!token) {
+      throw new Error("Please log in to view your complaints.");
+    }
+
+    const data = await fetchApi("/Complaints/mine", token);
+    setComplaints(Array.isArray(data) ? data : []);
+  } catch (error) {
+    setComplaints([]);
+    setComplaintsError(
+      error.message || "Unable to load your complaints."
+    );
+  } finally {
+    setComplaintsLoading(false);
+  }
+}, [token]);
+
+useEffect(() => {
+  loadComplaints();
+}, [loadComplaints, refreshKey]);
+
+const submitComplaint = async (event) => {
+  event.preventDefault();
+
+  if (!complaintSubject.trim() || !complaintDescription.trim()) {
+    setComplaintsError("Please enter a subject and description.");
+    return;
+  }
+
+  setComplaintSubmitting(true);
+  setComplaintsError("");
+  setComplaintSuccess("");
+
+  try {
+    await fetchApi("/Complaints", token, {
+      method: "POST",
+      body: JSON.stringify({
+        subject: complaintSubject.trim(),
+        description: complaintDescription.trim(),
+      }),
+    });
+
+    setComplaintSubject("");
+    setComplaintDescription("");
+    setComplaintSuccess("Your complaint was submitted successfully.");
+
+    await loadComplaints();
+  } catch (error) {
+    setComplaintsError(
+      error.message || "Unable to submit your complaint."
+    );
+  } finally {
+    setComplaintSubmitting(false);
+  }
+};
+
+const renderComplaints = () => (
+  <section className={styles.card}>
+    <h2 className={styles.sectionTitle}>Complaints & Feedback</h2>
+    <p className="pc-muted pc-section-description">
+      Share a concern with the daycare administration and follow its progress.
+    </p>
+
+    <form className="pc-complaint-form" onSubmit={submitComplaint}>
+      <label>
+        Subject
+        <input
+          value={complaintSubject}
+          onChange={(event) => setComplaintSubject(event.target.value)}
+          placeholder="Briefly describe your concern"
+          maxLength={200}
+          required
+        />
+      </label>
+
+      <label>
+        Description
+        <textarea
+          value={complaintDescription}
+          onChange={(event) =>
+            setComplaintDescription(event.target.value)
+          }
+          placeholder="Explain your concern in detail..."
+          rows={5}
+          maxLength={5000}
+          required
+        />
+      </label>
+
+      {complaintsError && (
+        <p className="pc-error" role="alert">{complaintsError}</p>
+      )}
+
+      {complaintSuccess && (
+        <p className="pc-edit-success" role="status">
+          {complaintSuccess}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        className="pc-button pc-button-primary"
+        disabled={complaintSubmitting}
+      >
+        {complaintSubmitting ? "Submitting..." : "Submit Complaint"}
+      </button>
+    </form>
+
+    <div className="pc-complaints-history">
+      <h3 className={styles.sectionTitle}>My Submitted Complaints</h3>
+
+      {complaintsLoading ? (
+        renderLoading("Loading your complaints...")
+      ) : complaintsError && complaints.length === 0 ? (
+        renderError(complaintsError, loadComplaints)
+      ) : complaints.length === 0 ? (
+        renderEmpty("You have not submitted any complaints yet.")
+      ) : (
+        complaints.map((complaint) => {
+          const id = getValue(complaint, "id", "Id");
+          const subject = getValue(complaint, "subject", "Subject");
+          const description = getValue(
+            complaint, "description", "Description"
+          );
+          const status =
+            getValue(complaint, "status", "Status") || "Pending";
+          const response = getValue(
+            complaint, "adminResponse", "AdminResponse"
+          );
+          const createdAt = getValue(
+            complaint, "createdAt", "CreatedAt"
+          );
+
+          return (
+            <article className="pc-complaint-card" key={id}>
+              <div className="pc-complaint-heading">
+                <h4>{subject}</h4>
+                <span
+                  className={`pc-complaint-status ${String(status)
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")}`}
+                >
+                  {status}
+                </span>
+              </div>
+
+              <p className="pc-complaint-date">
+                Submitted: {formatDate(createdAt)}
+              </p>
+              <p>{description}</p>
+
+              {response && (
+                <div className="pc-complaint-response">
+                  <strong>Daycare response</strong>
+                  <p>{response}</p>
+                </div>
+              )}
+            </article>
+          );
+        })
+      )}
+    </div>
+  </section>
+);
+
 
   const pageContent = {
     overview: renderOverview,
@@ -890,6 +1136,7 @@ const saveChildChanges = async (event) => {
     meals: renderMeals,
     attendance: renderAttendance,
     announcements: renderAnnouncements,
+  complaints: renderComplaints,
   };
 
   return (
@@ -957,163 +1204,158 @@ const saveChildChanges = async (event) => {
           </div>
         </header>
 
-        
-<div className="pc-page-content">
-  {pageContent[activePage]()}
+        <div className="pc-page-content">
+          {pageContent[activePage]()}
 
-  {activePage === "children" && editSuccess && (
-    <p className="pc-edit-success" role="status">
-      ✓ {editSuccess}
-    </p>
-  )}
-
-  {editingChild && (
-    <div
-      className="pc-edit-overlay"
-      onMouseDown={(event) => {
-        if (
-          event.target === event.currentTarget &&
-          !savingChild
-        ) {
-          setEditingChild(null);
-          setEditError("");
-        }
-      }}
-    >
-      <section
-        className="pc-edit-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="pc-edit-title"
-      >
-        <div className="pc-edit-modal-header">
-          <div>
-            <p className="pc-child-detail-label">CHILD PROFILE</p>
-            <h2 id="pc-edit-title">Edit Child Details</h2>
-            <p className="pc-muted">
-              Update your child's information below.
+          {activePage === "children" && editSuccess && (
+            <p className="pc-edit-success" role="status">
+              ✓ {editSuccess}
             </p>
-          </div>
-
-          <button
-            type="button"
-            className="pc-edit-close"
-            aria-label="Close edit form"
-            disabled={savingChild}
-            onClick={() => {
-              setEditingChild(null);
-              setEditError("");
-            }}
-          >
-            ×
-          </button>
-        </div>
-
-        <form onSubmit={saveChildChanges}>
-          <div className="pc-edit-form-grid">
-            <label className="pc-edit-field">
-              First Name
-              <input
-                name="firstName"
-                value={editingChild.firstName}
-                onChange={handleEditFieldChange}
-                required
-                maxLength={100}
-              />
-            </label>
-
-            <label className="pc-edit-field">
-              Last Name
-              <input
-                name="lastName"
-                value={editingChild.lastName}
-                onChange={handleEditFieldChange}
-                required
-                maxLength={100}
-              />
-            </label>
-
-            <label className="pc-edit-field">
-              Date of Birth
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={editingChild.dateOfBirth}
-                onChange={handleEditFieldChange}
-                required
-                max={getLocalDateString()}
-              />
-            </label>
-
-            <label className="pc-edit-field">
-              Gender
-              <input
-                name="gender"
-                value={editingChild.gender}
-                onChange={handleEditFieldChange}
-                maxLength={50}
-                placeholder="Enter gender"
-              />
-            </label>
-
-            <label className="pc-edit-field pc-edit-field-full">
-              Allergies
-              <textarea
-                name="allergies"
-                value={editingChild.allergies}
-                onChange={handleEditFieldChange}
-                rows={3}
-                maxLength={2000}
-                placeholder="Enter known allergies, or leave blank"
-              />
-            </label>
-
-            <label className="pc-edit-field pc-edit-field-full">
-              Health Conditions
-              <textarea
-                name="healthCondition"
-                value={editingChild.healthCondition}
-                onChange={handleEditFieldChange}
-                rows={3}
-                maxLength={2000}
-                placeholder="Enter relevant health conditions, or leave blank"
-              />
-            </label>
-          </div>
-
-          {editError && (
-            <div className="pc-error" role="alert">
-              {editError}
-            </div>
           )}
 
-          <div className="pc-edit-actions">
-            <button
-              type="button"
-              className="pc-button pc-button-secondary"
-              disabled={savingChild}
-              onClick={() => {
-                setEditingChild(null);
-                setEditError("");
+          {editingChild && (
+            <div
+              className="pc-edit-overlay"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget && !savingChild) {
+                  setEditingChild(null);
+                  setEditError("");
+                }
               }}
             >
-              Cancel
-            </button>
+              <section
+                className="pc-edit-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="pc-edit-title"
+              >
+                <div className="pc-edit-modal-header">
+                  <div>
+                    <p className="pc-child-detail-label">CHILD PROFILE</p>
+                    <h2 id="pc-edit-title">Edit Child Details</h2>
+                    <p className="pc-muted">
+                      Update your child's information below.
+                    </p>
+                  </div>
 
-            <button
-              type="submit"
-              className="pc-button pc-button-primary"
-              disabled={savingChild}
-            >
-              {savingChild ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        </form>
-      </section>
-    </div>
-  )}
-</div>
+                  <button
+                    type="button"
+                    className="pc-edit-close"
+                    aria-label="Close edit form"
+                    disabled={savingChild}
+                    onClick={() => {
+                      setEditingChild(null);
+                      setEditError("");
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
 
+                <form onSubmit={saveChildChanges}>
+                  <div className="pc-edit-form-grid">
+                    <label className="pc-edit-field">
+                      First Name
+                      <input
+                        name="firstName"
+                        value={editingChild.firstName}
+                        onChange={handleEditFieldChange}
+                        required
+                        maxLength={100}
+                      />
+                    </label>
+
+                    <label className="pc-edit-field">
+                      Last Name
+                      <input
+                        name="lastName"
+                        value={editingChild.lastName}
+                        onChange={handleEditFieldChange}
+                        required
+                        maxLength={100}
+                      />
+                    </label>
+
+                    <label className="pc-edit-field">
+                      Date of Birth
+                      <input
+                        type="date"
+                        name="dateOfBirth"
+                        value={editingChild.dateOfBirth}
+                        onChange={handleEditFieldChange}
+                        required
+                        max={getLocalDateString()}
+                      />
+                    </label>
+
+                    <label className="pc-edit-field">
+                      Gender
+                      <input
+                        name="gender"
+                        value={editingChild.gender}
+                        onChange={handleEditFieldChange}
+                        maxLength={50}
+                        placeholder="Enter gender"
+                      />
+                    </label>
+
+                    <label className="pc-edit-field pc-edit-field-full">
+                      Allergies
+                      <textarea
+                        name="allergies"
+                        value={editingChild.allergies}
+                        onChange={handleEditFieldChange}
+                        rows={3}
+                        maxLength={2000}
+                        placeholder="Enter known allergies, or leave blank"
+                      />
+                    </label>
+
+                    <label className="pc-edit-field pc-edit-field-full">
+                      Health Conditions
+                      <textarea
+                        name="healthCondition"
+                        value={editingChild.healthCondition}
+                        onChange={handleEditFieldChange}
+                        rows={3}
+                        maxLength={2000}
+                        placeholder="Enter relevant health conditions, or leave blank"
+                      />
+                    </label>
+                  </div>
+
+                  {editError && (
+                    <div className="pc-error" role="alert">
+                      {editError}
+                    </div>
+                  )}
+
+                  <div className="pc-edit-actions">
+                    <button
+                      type="button"
+                      className="pc-button pc-button-secondary"
+                      disabled={savingChild}
+                      onClick={() => {
+                        setEditingChild(null);
+                        setEditError("");
+                      }}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="pc-button pc-button-primary"
+                      disabled={savingChild}
+                    >
+                      {savingChild ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+                </form>
+              </section>
+            </div>
+          )}
+        </div>
 
         <div className="pc-refresh-row">
           <button
