@@ -185,6 +185,26 @@ function ParentDashboard() {
   });
 
   const token = localStorage.getItem("authToken");
+  
+const [profile, setProfile] = useState(() => {
+  const savedUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("authUser") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+
+  return {
+    firstName: savedUser.firstName || savedUser.FirstName || "",
+    lastName: savedUser.lastName || savedUser.LastName || "",
+    email: savedUser.email || savedUser.Email || "",
+    phoneNumber: savedUser.phoneNumber || savedUser.PhoneNumber || "",
+  };
+});
+
+const [isEditingProfile, setIsEditingProfile] = useState(false);
+const [profileMessage, setProfileMessage] = useState("");
 
 
   const [children, setChildren] = useState([]);
@@ -217,8 +237,11 @@ function ParentDashboard() {
   const [complaintSuccess, setComplaintSuccess] = useState("");
 
   
-  const parentName =
-    user?.firstName || user?.FirstName || user?.name || user?.Name || "Parent";
+const parentName =
+  `${profile.firstName} ${profile.lastName}`.trim() ||
+  user?.name ||
+  user?.Name ||
+  "Parent";
 
   const loadChildren = useCallback(async () => {
     setChildrenLoading(true);
@@ -1130,6 +1153,199 @@ const renderComplaints = () => (
 );
 
 
+const handleProfileChange = (event) => {
+  const { name, value } = event.target;
+
+  setProfile((current) => ({
+    ...current,
+    [name]: value,
+  }));
+};
+
+const handleProfileCancel = () => {
+  const savedUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("authUser") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+
+  setProfile({
+    firstName: savedUser.firstName || savedUser.FirstName || "",
+    lastName: savedUser.lastName || savedUser.LastName || "",
+    email: savedUser.email || savedUser.Email || "",
+    phoneNumber:
+      savedUser.phoneNumber || savedUser.PhoneNumber || "",
+  });
+
+  setProfileMessage("");
+  setIsEditingProfile(false);
+};
+
+const handleProfileSave = (event) => {
+  event.preventDefault();
+
+  const firstName = profile.firstName.trim();
+  const lastName = profile.lastName.trim();
+  const email = profile.email.trim();
+  const phoneNumber = profile.phoneNumber.trim();
+
+  if (!firstName || !lastName || !email) {
+    setProfileMessage("First name, last name, and email are required.");
+    return;
+  }
+
+  try {
+    const savedUser = JSON.parse(
+      localStorage.getItem("authUser") || "{}"
+    );
+
+    const updatedUser = {
+      ...savedUser,
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+    };
+
+    localStorage.setItem("authUser", JSON.stringify(updatedUser));
+
+    setProfile({
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+    });
+
+    setProfileMessage("Profile saved in this browser.");
+    setIsEditingProfile(false);
+    window.dispatchEvent(new Event("authChanged"));
+  } catch {
+    setProfileMessage("Unable to save your profile. Please try again.");
+  }
+};
+
+const renderProfile = () => (
+  <section className="pc-card pc-profile-page">
+    <div className="pc-card-heading">
+      <div>
+        <h2 className={styles.sectionTitle}>My Profile</h2>
+        <p className="pc-muted">
+          View and manage your personal information.
+        </p>
+      </div>
+
+      {!isEditingProfile && (
+        <button
+          type="button"
+          className="pc-button pc-button-primary"
+          onClick={() => {
+            setProfileMessage("");
+            setIsEditingProfile(true);
+          }}
+        >
+          Edit Profile
+        </button>
+      )}
+    </div>
+
+    <div className="pc-parent-profile-banner">
+      <div className="pc-parent-profile-avatar">
+        {profile.firstName.charAt(0).toUpperCase() || "P"}
+      </div>
+
+      <div>
+        <h2>
+          {profile.firstName} {profile.lastName}
+        </h2>
+        <p>Parent Account</p>
+      </div>
+    </div>
+
+    {profileMessage && (
+      <p className="pc-edit-success" role="status">
+        {profileMessage}
+      </p>
+    )}
+
+    <form onSubmit={handleProfileSave}>
+      <h3 className={styles.sectionTitle}>Personal Information</h3>
+
+      <div className="pc-parent-profile-grid">
+        <label>
+          First Name *
+          <input
+            name="firstName"
+            value={profile.firstName}
+            onChange={handleProfileChange}
+            disabled={!isEditingProfile}
+            required
+            maxLength={100}
+          />
+        </label>
+
+        <label>
+          Last Name *
+          <input
+            name="lastName"
+            value={profile.lastName}
+            onChange={handleProfileChange}
+            disabled={!isEditingProfile}
+            required
+            maxLength={100}
+          />
+        </label>
+
+        <label>
+          Email Address *
+          <input
+            type="email"
+            name="email"
+            value={profile.email}
+            onChange={handleProfileChange}
+            disabled={!isEditingProfile}
+            required
+            maxLength={254}
+          />
+        </label>
+
+        <label>
+          Phone Number
+          <input
+            type="tel"
+            name="phoneNumber"
+            value={profile.phoneNumber}
+            onChange={handleProfileChange}
+            disabled={!isEditingProfile}
+            maxLength={30}
+            placeholder="Enter your phone number"
+          />
+        </label>
+      </div>
+
+      {isEditingProfile && (
+        <div className="pc-edit-actions">
+          <button
+            type="button"
+            className="pc-button pc-button-secondary"
+            onClick={handleProfileCancel}
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            className="pc-button pc-button-primary"
+          >
+            Save Changes
+          </button>
+        </div>
+      )}
+    </form>
+  </section>
+);
+
   const pageContent = {
     overview: renderOverview,
     children: renderChildren,
@@ -1137,6 +1353,7 @@ const renderComplaints = () => (
     attendance: renderAttendance,
     announcements: renderAnnouncements,
   complaints: renderComplaints,
+    profile: renderProfile,
   };
 
   return (
@@ -1194,9 +1411,18 @@ const renderComplaints = () => (
           </div>
 
           <div className="pc-profile">
-            <div className="pc-profile-avatar">
-              {parentName.charAt(0).toUpperCase()}
-            </div>
+            <button
+  type="button"
+  className="pc-profile-avatar pc-profile-avatar-button"
+  onClick={() => {
+    setProfileMessage("");
+    setActivePage("profile");
+  }}
+  aria-label="Open My Profile"
+  title="My Profile"
+>
+  {parentName.charAt(0).toUpperCase()}
+</button>
             <div>
               <p className="pc-profile-name">{parentName}</p>
               <p className="pc-profile-role">Parent account</p>

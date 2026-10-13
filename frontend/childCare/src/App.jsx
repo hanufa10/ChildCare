@@ -28,6 +28,7 @@ import AuthPage from "./pages/AuthPage";
 import AdminUsers from "./pages/AdminUsers";
 import Announcements from "./pages/Announcements";
 import Complaints from "./pages/Complaints";
+import Profile from "./pages/Profile";
 
 import ParentDashboard from "./pages/ParentDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
@@ -97,6 +98,7 @@ function DashboardLayout() {
 
             <Route path="admin-announcements" element={<Announcements />} />
             <Route path="admin-complaints" element={<Complaints />} />
+            <Route path="profile" element={<Profile />} />
           </Routes>
         </div>
       </main>

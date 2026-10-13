@@ -103,13 +103,20 @@ function Header() {
           <MessageCircle size={24} />
         </Link>
 
-        <div className="name-icon">
-          {(
-            `${authUser.firstName?.[0] || ""}${
-              authUser.lastName?.[0] || ""
-            }` || "AD"
-          ).toUpperCase()}
-        </div>
+        
+<Link
+  to="/dashboard/profile"
+  className="name-icon profile-avatar-link"
+  title="My Profile"
+  aria-label="Open My Profile"
+>
+  {(
+    `${authUser.firstName?.[0] || ""}${
+      authUser.lastName?.[0] || ""
+    }` || "AD"
+  ).toUpperCase()}
+</Link>
+
 
         <div className="profile-info">
           <h5 style={{margin:"0px"}}>{adminName}</h5>
