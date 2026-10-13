@@ -28,6 +28,7 @@ import AdminUsers from "./pages/AdminUsers";
 import Announcements from "./pages/Announcements";
 import Complaints from "./pages/Complaints";
 import Profile from "./pages/Profile";
+import Payment from "./pages/Payment";
 
 import ParentDashboard from "./pages/ParentDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
@@ -62,6 +63,7 @@ function DashboardLayout() {
             <Route path="parents" element={<Parents />} />
             <Route path="staff" element={<Staff />} />
             <Route path="meals" element={<Meals />} />
+            <Route path="payments" element={<Payment/>}/>
 
             <Route
               path="parent-children"

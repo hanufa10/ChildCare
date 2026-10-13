@@ -25,6 +25,8 @@ public class DaycareDbContext
     public DbSet<Announcement> Announcements {get; set;} = null!;
     public DbSet<AnnouncementRecipient> AnnouncementRecipients {get;set;} = null!;
     public DbSet<Complaint> Complaints {get;set;} = null!;
+    public DbSet<Invoice> Invoices { get; set; } = null!;
+    public DbSet<Payment> Payments { get; set; } = null!;
 
    
 protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -79,6 +81,54 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
     modelBuilder.Entity<StaffAttendance>()
         .HasIndex(a => new { a.StaffId, a.AttendanceDate })
         .IsUnique();
+        
+    // Configure invoices.
+    modelBuilder.Entity<Invoice>()
+        .Property(i => i.Amount)
+        .HasPrecision(18, 2);
+
+    modelBuilder.Entity<Invoice>()
+        .Property(i => i.Status)
+        .HasConversion<string>();
+
+    modelBuilder.Entity<Invoice>()
+        .HasOne(i => i.Child)
+        .WithMany()
+        .HasForeignKey(i => i.ChildId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Invoice>()
+        .HasOne(i => i.Parent)
+        .WithMany()
+        .HasForeignKey(i => i.ParentId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Invoice>()
+        .HasIndex(i => new { i.ParentId, i.Status });
+
+    // Configure payments.
+    modelBuilder.Entity<Payment>()
+        .Property(p => p.Amount)
+        .HasPrecision(18, 2);
+
+    modelBuilder.Entity<Payment>()
+        .Property(p => p.Method)
+        .HasConversion<string>();
+
+    modelBuilder.Entity<Payment>()
+        .Property(p => p.Status)
+        .HasConversion<string>();
+
+    modelBuilder.Entity<Payment>()
+        .HasOne(p => p.Invoice)
+        .WithMany(i => i.Payments)
+        .HasForeignKey(p => p.InvoiceId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Payment>()
+        .HasIndex(p => p.TransactionReference)
+        .IsUnique()
+        .HasFilter("\"TransactionReference\" IS NOT NULL");
 }
 
 }

@@ -1,15 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import "../components/styles/ParentDashboard.css";
+import {
+  LayoutDashboard,
+  Baby,
+  Utensils,
+  CalendarCheck,
+  Megaphone,
+  MessageSquare,
+  CreditCard,
+} from "lucide-react";
 
 const API_URL = "http://localhost:5165/api";
 
 const navItems = [
-  { id: "overview", label: "Overview", icon: "⌂" },
-  { id: "children", label: "My Children", icon: "♧" },
-  { id: "meals", label: "Meal Schedule", icon: "♨" },
-  { id: "attendance", label: "Attendance", icon: "✓" },
-  { id: "announcements", label: "Announcements", icon: "♧" },
-  { id: "complaints", label: "Complaints", icon: "💬" },
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "children", label: "My Children", icon: Baby },
+  { id: "meals", label: "Meal Schedule", icon: Utensils },
+  { id: "attendance", label: "Attendance", icon: CalendarCheck },
+  { id: "announcements", label: "Announcements", icon: Megaphone },
+  { id: "complaints", label: "Complaints", icon: MessageSquare },
+  { id: "payments", label: "Payments", icon: CreditCard },
 ];
 
 const mealTypeLabels = {
@@ -176,6 +186,15 @@ function ParentDashboard() {
   const [activePage, setActivePage] = useState("overview");
   const [selectedDate, setSelectedDate] = useState("all");
   
+const [invoices, setInvoices] = useState([]);
+const [payments, setPayments] = useState([]);
+
+const [paymentsLoading, setPaymentsLoading] = useState(true);
+const [paymentsError, setPaymentsError] = useState("");
+const [paymentMessage, setPaymentMessage] = useState("");
+const [payingInvoiceId, setPayingInvoiceId] = useState(null);
+
+  
   const [user] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("authUser") || "null");
@@ -303,6 +322,75 @@ useEffect(() => {
 }, [loadAnnouncements, refreshKey]);
 
 
+const loadPayments = useCallback(async () => {
+  setPaymentsLoading(true);
+  setPaymentsError("");
+
+  try {
+    if (!token) {
+      throw new Error("Please log in to view your payments.");
+    }
+
+    const [invoiceData, paymentData] = await Promise.all([
+      fetchApi("/Invoices/mine", token),
+      fetchApi("/Payments/mine", token),
+    ]);
+
+    setInvoices(Array.isArray(invoiceData) ? invoiceData : []);
+    setPayments(Array.isArray(paymentData) ? paymentData : []);
+  } catch (error) {
+    setPaymentsError(
+      error.message || "Unable to load your payment information."
+    );
+  } finally {
+    setPaymentsLoading(false);
+  }
+}, [token]);
+
+useEffect(() => {
+  loadPayments();
+}, [loadPayments, refreshKey]);
+
+const handleMockPayment = async (invoice, method) => {
+  const invoiceId = getValue(invoice, "id", "Id");
+
+  if (!invoiceId || payingInvoiceId !== null) return;
+
+  setPayingInvoiceId(invoiceId);
+  setPaymentMessage("");
+  setPaymentsError("");
+
+  try {
+    const result = await fetchApi("/Payments/initiate", token, {
+      method: "POST",
+      body: JSON.stringify({
+        invoiceId,
+        // The backend enum is:
+        // MockMobileMoney = 0, MockCard = 1.
+        method,
+      }),
+    });
+
+    const status = getValue(result, "status", "Status");
+    const message = getValue(result, "message", "Message");
+
+    setPaymentMessage(
+      message ||
+        (status === "Succeeded"
+          ? "Mock payment successful."
+          : "Payment attempt completed.")
+    );
+
+    await loadPayments();
+  } catch (error) {
+    setPaymentsError(
+      error.message || "Unable to process the mock payment."
+    );
+  } finally {
+    setPayingInvoiceId(null);
+  }
+};
+
   const loadMeals = useCallback(async () => {
     setMealsLoading(true);
     setMealsError("");
@@ -421,6 +509,234 @@ useEffect(() => {
       <p>{message}</p>
     </div>
   );
+  
+const renderPayments = () => {
+  const unpaidInvoices = invoices.filter(
+    (invoice) =>
+      String(getValue(invoice, "status", "Status"))
+        .toLowerCase() === "unpaid"
+  );
+
+  const totalOutstanding = unpaidInvoices.reduce(
+    (total, invoice) =>
+      total + Number(getValue(invoice, "amount", "Amount") || 0),
+    0
+  );
+
+  const formatMoney = (amount) =>
+    new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "ETB",
+    }).format(Number(amount || 0));
+
+  return (
+    <section className="pc-payments-page">
+      <div className="pc-card pc-payments-summary">
+        <div>
+          <p className="pc-muted">Outstanding balance</p>
+          <h2>{formatMoney(totalOutstanding)}</h2>
+          <p className="pc-muted">
+            {unpaidInvoices.length} unpaid{" "}
+            {unpaidInvoices.length === 1 ? "invoice" : "invoices"}
+          </p>
+        </div>
+        <div className="pc-payment-summary-icon" aria-hidden="true">
+          💳
+        </div>
+      </div>
+
+      {paymentMessage && (
+        <p className="pc-edit-success" role="status">
+          {paymentMessage}
+        </p>
+      )}
+
+      {paymentsError && (
+        <div className="pc-error" role="alert">
+          <p>{paymentsError}</p>
+          <button
+            type="button"
+            className="pc-button pc-button-secondary"
+            onClick={loadPayments}
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      <section className="pc-card">
+        <h2 className={styles.sectionTitle}>Outstanding Invoices</h2>
+        <p className="pc-muted pc-section-description">
+          Review your daycare fees and choose a mock payment method.
+        </p>
+
+        {paymentsLoading ? (
+          renderLoading("Loading invoices...")
+        ) : unpaidInvoices.length === 0 ? (
+          renderEmpty("You have no outstanding invoices.")
+        ) : (
+          <div className="pc-payment-list">
+            {unpaidInvoices.map((invoice) => {
+              const id = getValue(invoice, "id", "Id");
+              const childName =
+                getValue(invoice, "childName", "ChildName") || "Child";
+              const description =
+                getValue(invoice, "description", "Description") ||
+                "Daycare fee";
+              const amount = getValue(invoice, "amount", "Amount");
+              const dueDate = getValue(invoice, "dueDate", "DueDate");
+              const isPaying = payingInvoiceId === id;
+
+              return (
+                <article className="pc-payment-card" key={id}>
+                  <div className="pc-payment-card-top">
+                    <div>
+                      <span className="pc-payment-label">
+                        INVOICE #{id}
+                      </span>
+                      <h3>{description}</h3>
+                      <p className="pc-muted">
+                        Child: {childName}
+                      </p>
+                      <p className="pc-muted">
+                        Due: {formatDate(dueDate)}
+                      </p>
+                    </div>
+
+                    <div className="pc-payment-amount">
+                      {formatMoney(amount)}
+                    </div>
+                  </div>
+
+                  <div className="pc-payment-actions">
+                    <button
+                      type="button"
+                      className="pc-button pc-button-primary"
+                      disabled={payingInvoiceId !== null}
+                      onClick={() => handleMockPayment(invoice, 0)}
+                    >
+                      {isPaying
+                        ? "Processing..."
+                        : "📱 Mock Mobile Money"}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="pc-button pc-button-secondary"
+                      disabled={payingInvoiceId !== null}
+                      onClick={() => handleMockPayment(invoice, 1)}
+                    >
+                      💳 Mock Card
+                    </button>
+                  </div>
+
+                  <p className="pc-payment-disclaimer">
+                    Demonstration only. No real money will be charged.
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className="pc-card pc-payment-history">
+        <div className="pc-card-heading">
+          <div>
+            <h2 className={styles.sectionTitle}>Payment History</h2>
+            <p className="pc-muted">
+              Your previous payment attempts and their results.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="pc-button pc-button-secondary"
+            onClick={loadPayments}
+            disabled={paymentsLoading}
+          >
+            ↻ Refresh
+          </button>
+        </div>
+
+        {paymentsLoading ? (
+          renderLoading("Loading payment history...")
+        ) : payments.length === 0 ? (
+          renderEmpty("You have no payment history yet.")
+        ) : (
+          <div className="pc-payment-history-list">
+            {payments.map((payment) => {
+              const id = getValue(payment, "id", "Id");
+              const description =
+                getValue(
+                  payment,
+                  "invoiceDescription",
+                  "InvoiceDescription"
+                ) || `Invoice #${getValue(payment, "invoiceId", "InvoiceId")}`;
+              const childName =
+                getValue(payment, "childName", "ChildName") || "Child";
+              const amount = getValue(payment, "amount", "Amount");
+              const method = getValue(payment, "method", "Method");
+              const status = getValue(payment, "status", "Status");
+              const reference = getValue(
+                payment,
+                "transactionReference",
+                "TransactionReference"
+              );
+              const createdAt = getValue(
+                payment,
+                "createdAt",
+                "CreatedAt"
+              );
+              const failureReason = getValue(
+                payment,
+                "failureReason",
+                "FailureReason"
+              );
+
+              return (
+                <article className="pc-payment-history-item" key={id}>
+                  <div className="pc-payment-history-main">
+                    <h3>{description}</h3>
+                    <p className="pc-muted">{childName}</p>
+                    <p className="pc-muted">
+                      {formatDate(createdAt)} ·{" "}
+                      {method === "0"
+                        ? "Mock Mobile Money"
+                        : method === "1"
+                          ? "Mock Card"
+                          : method || "Payment method"}
+                    </p>
+                    {reference && (
+                      <p className="pc-payment-reference">
+                        Reference: {reference}
+                      </p>
+                    )}
+                    {failureReason && (
+                      <p className="pc-payment-failure">
+                        {failureReason}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pc-payment-history-end">
+                    <strong>{formatMoney(amount)}</strong>
+                    <span
+                      className={`pc-payment-status ${String(status || "Pending")
+                        .toLowerCase()}`}
+                    >
+                      {status || "Pending"}
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
+    </section>
+  );
+};
 
   const renderMealList = (items) => {
     if (mealsLoading) return renderLoading("Loading meals...");
@@ -1354,6 +1670,7 @@ const renderProfile = () => (
     announcements: renderAnnouncements,
   complaints: renderComplaints,
     profile: renderProfile,
+    payments: renderPayments,
   };
 
   return (
@@ -1364,26 +1681,30 @@ const renderProfile = () => (
 
         <p className="pc-nav-label">MENU</p>
 
-        <nav className="pc-navigation" aria-label="Parent dashboard navigation">
-          {navItems.map((item) => {
-            const isActive = activePage === item.id;
 
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setActivePage(item.id)}
-                aria-current={isActive ? "page" : undefined}
-                className={`pc-nav-item ${isActive ? "active" : ""}`}
-              >
-                <span className="pc-nav-icon" aria-hidden="true">
-                  {item.icon}
-                </span>
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
+<nav className="pc-navigation" aria-label="Parent dashboard navigation">
+  {navItems.map((item) => {
+    const isActive = activePage === item.id;
+    const Icon = item.icon;
+
+    return (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => setActivePage(item.id)}
+        aria-current={isActive ? "page" : undefined}
+        className={`pc-nav-item ${isActive ? "active" : ""}`}
+      >
+        <span className="pc-nav-icon" aria-hidden="true">
+          <Icon size={20} strokeWidth={1.8} />
+        </span>
+
+        <span>{item.label}</span>
+      </button>
+    );
+  })}
+</nav>
+
 
         <div className="pc-sidebar-spacer" />
 

@@ -268,6 +268,48 @@ namespace Daycare.Api.Migrations
                     b.ToTable("Complaints");
                 });
 
+            modelBuilder.Entity("Daycare.Api.Models.Invoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<int>("ChildId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<DateTimeOffset>("DueDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ParentId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChildId");
+
+                    b.HasIndex("ParentId", "Status");
+
+                    b.ToTable("Invoices");
+                });
+
             modelBuilder.Entity("Daycare.Api.Models.Meal", b =>
                 {
                     b.Property<int>("Id")
@@ -346,6 +388,54 @@ namespace Daycare.Api.Migrations
                     b.HasIndex("ChildId");
 
                     b.ToTable("ParentChildren");
+                });
+
+            modelBuilder.Entity("Daycare.Api.Models.Payment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TransactionReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.HasIndex("TransactionReference")
+                        .IsUnique()
+                        .HasFilter("\"TransactionReference\" IS NOT NULL");
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("Daycare.Api.Models.Staff", b =>
@@ -583,6 +673,25 @@ namespace Daycare.Api.Migrations
                     b.Navigation("Child");
                 });
 
+            modelBuilder.Entity("Daycare.Api.Models.Invoice", b =>
+                {
+                    b.HasOne("Daycare.Api.Models.Child", "Child")
+                        .WithMany()
+                        .HasForeignKey("ChildId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Daycare.Api.Models.Parent", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Child");
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("Daycare.Api.Models.Parent", b =>
                 {
                     b.HasOne("Daycare.Api.Identity.ApplicationUser", null)
@@ -608,6 +717,17 @@ namespace Daycare.Api.Migrations
                     b.Navigation("Child");
 
                     b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Daycare.Api.Models.Payment", b =>
+                {
+                    b.HasOne("Daycare.Api.Models.Invoice", "Invoice")
+                        .WithMany("Payments")
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Invoice");
                 });
 
             modelBuilder.Entity("Daycare.Api.Models.Staff", b =>
@@ -688,6 +808,11 @@ namespace Daycare.Api.Migrations
             modelBuilder.Entity("Daycare.Api.Models.Child", b =>
                 {
                     b.Navigation("ParentChildren");
+                });
+
+            modelBuilder.Entity("Daycare.Api.Models.Invoice", b =>
+                {
+                    b.Navigation("Payments");
                 });
 
             modelBuilder.Entity("Daycare.Api.Models.Parent", b =>

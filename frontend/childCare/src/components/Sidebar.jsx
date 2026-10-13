@@ -9,7 +9,7 @@ import {
   Plus,
   Heart,
   Megaphone,
-  MessageCircle
+  CreditCard
 } from "lucide-react";
 
 function Sidebar() {
@@ -79,12 +79,12 @@ function Sidebar() {
             <UserRound size={20}/>
             <Link to="/dashboard/admin-users">User Management</Link>
           </li>
+          <li>
+            <CreditCard size={20}/>
+            <Link to="/dashboard/payments">Payments</Link>
+          </li>
         </ul>
       </nav>
-          <div className="sd-sidebars-note">
-            <span>♡</span>
-            <p>Little steps make a big difference.</p>
-        </div>
       <div className="bottom-profile">
         <div></div>
 

@@ -1460,3 +1460,163 @@
     padding: 18px;
   }
 }
+
+.pc-payments-page {
+  display: grid;
+  gap: 24px;
+}
+
+.pc-payments-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #f0f8f3;
+  border: 1px solid #dcece1;
+}
+
+.pc-payments-summary h2 {
+  margin: 8px 0;
+  font-size: 30px;
+}
+
+.pc-payment-summary-icon {
+  font-size: 42px;
+}
+
+.pc-payment-list,
+.pc-payment-history-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.pc-payment-card,
+.pc-payment-history-item {
+  padding: 20px;
+  border: 1px solid #e5e9e6;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.pc-payment-card-top,
+.pc-payment-history-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.pc-payment-card h3,
+.pc-payment-history-item h3 {
+  margin: 8px 0;
+}
+
+.pc-payment-label {
+  color: #568268;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.pc-payment-amount {
+  font-size: 22px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pc-payment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.pc-payment-disclaimer {
+  margin: 14px 0 0;
+  color: #777;
+  font-size: 12px;
+}
+
+.pc-payment-history-main {
+  min-width: 0;
+}
+
+.pc-payment-history-end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  text-align: right;
+}
+
+.pc-payment-reference {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: #777;
+}
+
+.pc-payment-failure {
+  color: #b42318;
+  font-size: 13px;
+}
+
+.pc-payment-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #f1f2f3;
+  color: #4b5563;
+}
+
+.pc-payment-status.succeeded {
+  background: #e5f6eb;
+  color: #207344;
+}
+
+.pc-payment-status.failed {
+  background: #fde8e7;
+  color: #b42318;
+}
+
+.pc-payment-status.pending {
+  background: #fff3d6;
+  color: #8a5a00;
+}
+
+@media (max-width: 600px) {
+  .pc-payment-card-top,
+  .pc-payment-history-item {
+    flex-direction: column;
+  }
+
+  .pc-payment-history-end {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .pc-payment-actions {
+    flex-direction: column;
+  }
+
+  .pc-payment-actions button {
+    width: 100%;
+  }
+}
+
+.pc-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.pc-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
