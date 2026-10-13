@@ -22,6 +22,9 @@ public class DaycareDbContext
     public DbSet<Staff> Staff { get; set; } = null!;
     public DbSet<ChildAttendance> ChildAttendances { get; set; } = null!;
     public DbSet<StaffAttendance> StaffAttendances { get; set; } = null!;
+    public DbSet<Announcement> Announcements {get; set;} = null!;
+    public DbSet<AnnouncementRecipient> AnnouncementRecipients {get;set;} = null!;
+    public DbSet<Complaint> Complaints {get;set;} = null!;
 
    
 protected override void OnModelCreating(ModelBuilder modelBuilder)
