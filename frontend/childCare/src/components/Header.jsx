@@ -1,11 +1,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  Search,
   ChevronDown,
   Users,
   UserRound,
-  MessageCircle
+  CalendarCheck
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -38,34 +37,29 @@ function Header() {
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   return (
     <header className="header-component">
-      <div className="header-left">
-        <Search size={25} />
-        <input placeholder="Search anything ..." />
+      <div className="header-left"></div>
 
+      <div className="header-right">
+        {/* Attendance icon with dropdown */}
         <div className="attendance-dropdown" ref={dropdownRef}>
           <button
             type="button"
-            className="register-child-button attendance-trigger"
+            className="header-user-link attendance-icon-button"
             onClick={() => setAttendanceOpen((open) => !open)}
             aria-expanded={attendanceOpen}
+            aria-label="Open attendance menu"
+            title="Attendance"
           >
-            Attendance
-
+            <CalendarCheck size={24} />
             <ChevronDown
-              size={18}
-              className={
-                attendanceOpen ? "chevron-rotated" : ""
-              }
-              color="white"
+              size={14}
+              className={attendanceOpen ? "chevron-rotated" : ""}
             />
           </button>
 
@@ -91,36 +85,25 @@ function Header() {
             </div>
           )}
         </div>
-      </div>
 
-      <div className="header-right">
+        {/* Admin profile avatar */}
         <Link
-          to="/dashboard/admin-complaints"
-          className="header-user-link"
-          title="User Complaints"
-          aria-label="Open User Complaints"
+          to="/dashboard/profile"
+          className="name-icon profile-avatar-link"
+          title="My Profile"
+          aria-label="Open My Profile"
         >
-          <MessageCircle size={24} />
+          {(
+            `${authUser.firstName?.[0] || ""}${
+              authUser.lastName?.[0] || ""
+            }` || "AD"
+          ).toUpperCase()}
         </Link>
 
-        
-<Link
-  to="/dashboard/profile"
-  className="name-icon profile-avatar-link"
-  title="My Profile"
-  aria-label="Open My Profile"
->
-  {(
-    `${authUser.firstName?.[0] || ""}${
-      authUser.lastName?.[0] || ""
-    }` || "AD"
-  ).toUpperCase()}
-</Link>
-
-
+        {/* Admin name and email */}
         <div className="profile-info">
-          <h5 style={{margin:"0px"}}>{adminName}</h5>
-          <p style={{margin:"0px"}}>{adminEmail}</p>
+          <h5 style={{ margin: "0px" }}>{adminName}</h5>
+          <p style={{ margin: "0px" }}>{adminEmail}</p>
         </div>
       </div>
     </header>

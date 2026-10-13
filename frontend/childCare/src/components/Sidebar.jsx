@@ -6,10 +6,10 @@ import {
   Users,
   UserRound,
   Utensils,
-  Plus,
   Heart,
   Megaphone,
-  CreditCard
+  CreditCard,
+  MessageCircle
 } from "lucide-react";
 
 function Sidebar() {
@@ -68,8 +68,8 @@ function Sidebar() {
           </li>
 
           <li>
-            <Plus size={20} />
-            <Link to="/dashboard/registration">Register Child</Link>
+            <MessageCircle size={20} />
+            <Link to="/dashboard/admin-complaints">Complaints</Link>
           </li>
           <li>
             <Megaphone size={20}/>

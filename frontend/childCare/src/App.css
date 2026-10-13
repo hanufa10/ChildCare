@@ -189,22 +189,7 @@ nav li.active svg {
   align-items: center;
   justify-content: space-between;
   margin-right: 5px;
-  background: #fff7fb;
-  border-bottom: 1px solid #c3c3c3;
-}
-
-.header-component input {
-  width: 700px;
-  margin: 0;
-  padding: 20px 0;
-  border: 0;
-  outline: 0;
-  background: inherit;
-  font-size: 15px;
-}
-
-.header-component input::placeholder {
-  color: #949494;
+  padding: 15px;
 }
 
 .header-right,
@@ -237,11 +222,13 @@ nav li.active svg {
   font-size: 14px;
 }
 
-
 .profile-avatar-link {
   text-decoration: none;
   cursor: pointer;
   transition: transform 0.2s ease;
+  background-color:#ffcde9;
+  padding: 10px;
+  border-radius: 50%;
 }
 
 .profile-avatar-link:hover {
@@ -303,6 +290,25 @@ nav li.active svg {
 .attendance-dropdown-item:hover {
     background: #fff0f7;
     color: #c15c91;
+}
+
+.attendance-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  position: relative;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.attendance-icon-button .chevron-rotated {
+  transform: rotate(180deg);
+}
+
+.attendance-icon-button svg {
+  flex-shrink: 0;
 }
 
 main {
@@ -590,7 +596,7 @@ main {
 .add-parent-button,
 .add-staff-button {
   height: 50px;
-  padding: 0 23px;
+  padding: 0 20px;
   border-radius: 13px;
   font-size: 15px;
   box-shadow: 0 6px 14px rgba(217, 108, 157, 0.18);
