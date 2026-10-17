@@ -137,7 +137,9 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
-
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+    
 var app = builder.Build();
 
 // Seed Identity roles and the optional initial Admin

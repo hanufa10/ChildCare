@@ -3,7 +3,9 @@ using Daycare.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using Daycare.Api.Features.Children.Queries;
+using Daycare.Api.Features.Children.Commands;
+using MediatR;
 namespace Daycare.Api.Controllers;
 
 [ApiController]
@@ -11,23 +13,30 @@ namespace Daycare.Api.Controllers;
 [Authorize]
 public class ChildrenController : ControllerBase
 {
-    private readonly DaycareDbContext _context;
+    
+        private readonly DaycareDbContext _context;
+        private readonly ISender _sender;
 
-    public ChildrenController(DaycareDbContext context)
-    {
-        _context = context;
-    }
+        public ChildrenController(
+            DaycareDbContext context,
+            ISender sender)
+        {
+            _context = context;
+            _sender = sender;
+        }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Child>>> GetChildren()
     {
-        return await _context.Children.ToListAsync();
+        var children = await _sender.Send(new GetChildrenQuery());
+        return Ok(children);
     }
 
+        
     [HttpGet("{id}")]
     public async Task<ActionResult<Child>> GetChild(int id)
     {
-        var child = await _context.Children.FindAsync(id);
+        var child = await _sender.Send(new GetChildByIdQuery(id));
 
         if (child == null)
         {
@@ -37,96 +46,70 @@ public class ChildrenController : ControllerBase
         return child;
     }
 
-    [HttpPost]
-    public async Task<ActionResult<Child>> CreateChild(Child child)
-    {
-        _context.Children.Add(child);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetChild), new { id = child.Id }, child);
-    }
 
     
+[HttpPost]
+public async Task<ActionResult<Child>> CreateChild(Child child)
+{
+    var createdChild = await _sender.Send(
+        new CreateChildCommand(child));
+
+    return CreatedAtAction(
+        nameof(GetChild),
+        new { id = createdChild.Id },
+        createdChild);
+}
+
+
+    
+
 [HttpPut("{id}")]
 public async Task<IActionResult> UpdateChild(int id, Child child)
 {
-    if (id != child.Id)
+    var userId = User.FindFirst(
+        System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+    var command = new UpdateChildCommand(
+        id,
+        child,
+        User.IsInRole("Admin") || User.IsInRole("Staff"),
+        User.IsInRole("Parent"),
+        userId);
+
+    var result = await _sender.Send(command);
+
+    if (result.Error != null)
     {
-        return BadRequest("Child ID does not match.");
+        return BadRequest(result.Error);
     }
 
-    var existingChild = await _context.Children.FindAsync(id);
-
-    if (existingChild == null)
+    if (result.NotFound)
     {
         return NotFound();
     }
 
-    var isAdminOrStaff =
-        User.IsInRole("Admin") || User.IsInRole("Staff");
-
-    if (!isAdminOrStaff)
+    if (result.Forbidden)
     {
-        if (!User.IsInRole("Parent"))
-        {
-            return Forbid();
-        }
-
-        var userId = User.FindFirst(
-            System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Forbid();
-        }
-
-        var parent = await _context.Parents
-            .FirstOrDefaultAsync(p => p.ApplicationUserId == userId);
-
-        if (parent == null)
-        {
-            return Forbid();
-        }
-
-        var isLinked = await _context.ParentChildren
-            .AnyAsync(pc =>
-                pc.ParentId == parent.Id &&
-                pc.ChildId == id);
-
-        if (!isLinked)
-        {
-            return Forbid();
-        }
+        return Forbid();
     }
-
-    existingChild.FirstName = child.FirstName;
-    existingChild.LastName = child.LastName;
-    existingChild.DateOfBirth = child.DateOfBirth;
-    existingChild.Gender = child.Gender;
-    existingChild.Allergies = child.Allergies;
-    existingChild.HealthCondition = child.HealthCondition;
-
-    await _context.SaveChangesAsync();
 
     return NoContent();
 }
 
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteChild(int id)
+    
+[HttpDelete("{id}")]
+public async Task<IActionResult> DeleteChild(int id)
+{
+    var result = await _sender.Send(new DeleteChildCommand(id));
+
+    if (result.NotFound)
     {
-        var child = await _context.Children.FindAsync(id);
-
-        if (child == null)
-        {
-            return NotFound();
-        }
-
-        _context.Children.Remove(child);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
+        return NotFound();
     }
+
+    return NoContent();
+}
 
     private bool ChildExists(int id)
     {
