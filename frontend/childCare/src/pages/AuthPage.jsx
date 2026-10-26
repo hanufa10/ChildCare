@@ -28,10 +28,19 @@ function AuthPage() {
   });
 
   // Keep the displayed form in sync with the URL.
-  useEffect(() => {
-    setIsSignup(location.pathname === "/signup");
+
+useEffect(() => {
+  setIsSignup(location.pathname === "/signup");
+
+  if (location.state?.message) {
+    setMessage(location.state.message);
+    setMessageType("success");
+  } else {
     setMessage("");
-  }, [location.pathname]);
+    setMessageType("error");
+  }
+}, [location.pathname, location.state]);
+
 
   const showMessage = (text, type = "error") => {
     setMessage(text);
@@ -39,7 +48,7 @@ function AuthPage() {
   };
 
   const readError = async (response) => {
-    const data = await response.json().catch(() => null);
+    const data = await response.json().catch(() => null); 
 
     if (data?.errors) {
       const errors = Object.values(data.errors).flat();
@@ -76,6 +85,9 @@ function AuthPage() {
       }
 
       const data = await response.json();
+      
+    console.log("Login response:", data);
+    console.log("Must change password:", data.mustChangePassword); 
 
       if (!data.token) {
         throw new Error("Login succeeded, but the API did not return a token.");
@@ -97,6 +109,7 @@ console.log("Roles returned by API:", JSON.stringify(roles));
           lastName: data.lastName,
           email: data.email,
           roles,
+          mustChangePassword: data.mustChangePassword === true,
         }),
       );
 
@@ -109,8 +122,14 @@ console.log("Roles returned by API:", JSON.stringify(roles));
       } else if (roles.includes("Staff")) {
         navigate("/staff-dashboard", { replace: true });
       } else if (roles.includes("Parent")) {
-        navigate("/parent-dashboard", { replace: true });
-      } else {
+        if (data.mustChangePassword === true) {
+          navigate("/change-password", { replace: true });
+        } else {
+          navigate("/parent-dashboard", { replace: true });
+        }
+      }
+
+      else {
         localStorage.removeItem("authToken");
         localStorage.removeItem("authUser");
         window.dispatchEvent(new Event("authChanged"));
@@ -189,7 +208,6 @@ console.log("Roles returned by API:", JSON.stringify(roles));
     setMessage("");
     navigate(signup ? "/signup" : "/login");
   };
-
   return (
     <div className={`auth-page ${isSignup ? "signup-mode" : ""}`}>
       <div className="auth-card">

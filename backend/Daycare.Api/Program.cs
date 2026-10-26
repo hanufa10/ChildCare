@@ -139,7 +139,7 @@ builder.Services.AddCors(options =>
 });
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-    
+
 var app = builder.Build();
 
 // Seed Identity roles and the optional initial Admin
@@ -159,9 +159,46 @@ app.UseHttpsRedirection();
 
 app.UseCors("ReactApp");
 
+
 app.UseAuthentication();
+
+// Require parents with temporary passwords to change them first.
+app.Use(async (context, next) =>
+{
+    var mustChangePassword = context.User.HasClaim(
+        "must_change_password",
+        "true"
+    );
+
+    var isChangePasswordEndpoint =
+        string.Equals(
+            context.Request.Path.Value?.TrimEnd('/'),
+            "/api/Auth/change-password",
+            StringComparison.OrdinalIgnoreCase
+        );
+
+    if (context.User.Identity?.IsAuthenticated == true
+        && mustChangePassword
+        && !isChangePasswordEndpoint)
+    {
+        context.Response.StatusCode =
+            StatusCodes.Status403Forbidden;
+
+        await context.Response.WriteAsJsonAsync(new
+        {
+            mustChangePassword = true,
+            message = "You must change your temporary password before continuing."
+        });
+
+        return;
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

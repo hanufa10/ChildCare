@@ -121,7 +121,8 @@ public class RegistrationController : ControllerBase
                     Email = email,
                     FirstName = request.ParentFirstName.Trim(),
                     LastName = request.ParentLastName.Trim(),
-                    PhoneNumber = request.ParentPhoneNumber?.Trim()
+                    PhoneNumber = request.ParentPhoneNumber?.Trim(),
+                    MustChangePassword = true
                 };
 
                 var createResult = await _userManager.CreateAsync(

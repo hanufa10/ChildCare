@@ -149,6 +149,60 @@ public class AuthController : ControllerBase
 
         return Ok(response);
     }
+    
+[Authorize(Roles = AppRoles.Parent)]
+[HttpPost("change-password")]
+public async Task<IActionResult> ChangePassword(
+    ChangePasswordRequest request)
+{
+    var user = await _userManager.GetUserAsync(User);
+
+    if (user == null)
+    {
+        return Unauthorized(new
+        {
+            message = "User account not found."
+        });
+    }
+
+    if (!user.MustChangePassword)
+    {
+        return BadRequest(new
+        {
+            message = "A password change is not required."
+        });
+    }
+
+    var result = await _userManager.ChangePasswordAsync(
+        user,
+        request.CurrentPassword,
+        request.NewPassword);
+
+    if (!result.Succeeded)
+    {
+        return BadRequest(new
+        {
+            errors = result.Errors.Select(e => e.Description)
+        });
+    }
+
+    user.MustChangePassword = false;
+
+    var updateResult = await _userManager.UpdateAsync(user);
+
+    if (!updateResult.Succeeded)
+    {
+        return StatusCode(500, new
+        {
+            message = "Password changed, but the account status could not be updated. Please contact the administrator."
+        });
+    }
+
+    return Ok(new
+    {
+        message = "Password changed successfully."
+    });
+}
 
     private async Task<AuthResponse> CreateAuthResponse(
         ApplicationUser user)
@@ -188,7 +242,12 @@ public class AuthController : ControllerBase
             new(ClaimTypes.Name,
                 user.UserName ?? user.Email ?? ""),
             new(JwtRegisteredClaimNames.Jti,
-                Guid.NewGuid().ToString())
+                Guid.NewGuid().ToString()),
+            new Claim(
+                "must_change_password",
+                user.MustChangePassword ? "true" : "false"
+            ),
+
         };
 
         claims.AddRange(roles.Select(role =>
@@ -214,7 +273,8 @@ public class AuthController : ControllerBase
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email ?? "",
-            Roles = roles
+            Roles = roles,
+            MustChangePassword = user.MustChangePassword
         };
     }
 }

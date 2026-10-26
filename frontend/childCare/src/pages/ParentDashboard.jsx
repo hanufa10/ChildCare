@@ -1190,6 +1190,7 @@ const renderPayments = () => {
             disabled={mealsLoading || mealDates.length === 0}
           >
             <option value="all">All scheduled dates</option>
+            <option value={today}>Today - {formatDate(today)}</option>
             {mealDates.map((date) => (
               <option key={date} value={date}>
                 {formatDate(date)}
@@ -1204,7 +1205,12 @@ const renderPayments = () => {
       ) : mealsError ? (
         renderError(mealsError, loadMeals)
       ) : filteredMeals.length === 0 ? (
-        renderEmpty("No meals have been scheduled yet.")
+        renderEmpty(
+          selectedDate === today
+          ? "No meal plan for today."
+          : selectedDate === "all"
+          ? "No meals have been scheduled yet."
+          :"No meals have been scheduled yet.")
       ) : (
         <div className="pc-meals-by-date">
           {Object.entries(

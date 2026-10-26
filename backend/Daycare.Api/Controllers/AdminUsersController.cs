@@ -88,7 +88,8 @@ public class AdminUsersController : ControllerBase
                 Email = email,
                 FirstName = request.FirstName.Trim(),
                 LastName = request.LastName.Trim(),
-                PhoneNumber = request.PhoneNumber
+                PhoneNumber = request.PhoneNumber,
+                MustChangePassword = request.Role == AppRoles.Parent
             };
 
             var result = await _userManager.CreateAsync(

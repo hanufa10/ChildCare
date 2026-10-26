@@ -33,6 +33,8 @@ import Payment from "./pages/Payment";
 import ParentDashboard from "./pages/ParentDashboard";
 import StaffDashboard from "./pages/StaffDashboard";
 
+import ChangePassword from "./pages/ChangePassword";
+
 import { logout } from './utils/auth'
 
 // Read the logged-in user's information safely.
@@ -134,6 +136,8 @@ function AppRoutes() {
 
   const isLoggedIn = Boolean(auth.token && auth.user);
   const roles = auth.user?.roles || [];
+  const mustChangePassword =
+  auth.user?.mustChangePassword === true;
 
   const isAdmin = roles.includes("Admin");
   const isStaff = roles.includes("Staff");
@@ -141,15 +145,17 @@ function AppRoutes() {
 
   // Determine the correct landing page for each role.
   // Admin takes priority if an account has multiple roles.
-  let homeRoute = "/login";
+ let homeRoute = "/login";
 
-  if (isAdmin) {
-    homeRoute = "/dashboard";
-  } else if (isStaff) {
-    homeRoute = "/staff-dashboard";
-  } else if (isParent) {
-    homeRoute = "/parent-dashboard";
-  }
+if (isParent && mustChangePassword) {
+  homeRoute = "/change-password";
+} else if (isAdmin) {
+  homeRoute = "/dashboard";
+} else if (isStaff) {
+  homeRoute = "/staff-dashboard";
+} else if (isParent) {
+  homeRoute = "/parent-dashboard";
+}
   
   // Automatically log out when a JWT expires.
   useEffect(() => {
@@ -239,18 +245,33 @@ function AppRoutes() {
         }
       />
 
+      
+      <Route
+        path="/change-password"
+        element={
+          isLoggedIn && isParent && !isAdmin && !isStaff &&
+          mustChangePassword ? (
+            <ChangePassword />
+          ) : (
+            <Navigate to={homeRoute} replace />
+          )
+        }
+      />
       {/* Parent dashboard */}
       <Route
         path="/parent-dashboard"
         element={
-          isLoggedIn && isParent && !isAdmin && !isStaff ? (
+          isLoggedIn &&
+          isParent &&
+          !isAdmin &&
+          !isStaff &&
+          !mustChangePassword ? (
             <ParentDashboard />
           ) : (
             <Navigate to={homeRoute} replace />
           )
         }
       />
-
       {/* Redirect unknown URLs to the appropriate home page */}
       <Route
         path="*"
