@@ -1,6 +1,6 @@
 .admin-users-page {
   padding: 28px;
-  color: #243047;
+  color: #26352e;
 }
 
 .admin-users-heading {
@@ -17,16 +17,16 @@
 
 .admin-users-heading p {
   margin: 0;
-  color: #697586;
+  color: #7e8980;
 }
 
 .admin-users-card {
   max-width: 900px;
   padding: 28px;
   background: #fff;
-  border: 1px solid #e5e9f0;
-  border-radius: 12px;
-  box-shadow: 0 3px 12px rgb(0 0 0 / 4%);
+  border: 1px solid #e8ece6;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgb(38 53 46 / 4%);
 }
 
 .admin-users-card h2 {
@@ -56,17 +56,17 @@
   width: 100%;
   box-sizing: border-box;
   padding: 12px;
-  border: 1px solid #d6dce5;
-  border-radius: 7px;
+  border: 1px solid #dfe7dc;
+  border-radius: 9px;
   background: #fff;
-  color: #243047;
+  color: #26352e;
   font: inherit;
 }
 
 .user-form-group input:focus,
 .user-form-group select:focus {
-  outline: 2px solid #b9d8ff;
-  border-color: #4385e5;
+  outline: 2px solid #a8d7b9;
+  border-color: #47785b;
 }
 
 .user-form-actions {
@@ -78,15 +78,15 @@
 .user-form-actions button {
   padding: 12px 22px;
   border: none;
-  border-radius: 7px;
-  background: #2864dc;
+  border-radius: 9px;
+  background: #47785b;
   color: #fff;
   font-weight: 600;
   cursor: pointer;
 }
 
 .user-form-actions button:hover {
-  background: #1f50b4;
+  background: #38664a;
 }
 
 .user-form-actions button:disabled {
@@ -102,8 +102,8 @@
 }
 
 .user-success {
-  background: #e8f7ed;
-  color: #176b36;
+  background: #e4f5e9;
+  color: #267452;
 }
 
 .user-error {

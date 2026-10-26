@@ -20,16 +20,16 @@
 
 .admin-profile-header p {
   margin: 0;
-  color: #777386;
+  color: #7e8980;
 }
 
 .admin-profile-card {
   max-width: 1000px;
   padding: 28px;
   background: #fff;
-  border: 1px solid #eeeaf3;
+  border: 1px solid #e8ece6;
   border-radius: 14px;
-  box-shadow: 0 4px 18px rgb(30 20 50 / 5%);
+  box-shadow: 0 4px 18px rgb(38 53 46 / 5%);
 }
 
 .admin-profile-banner {
@@ -38,7 +38,7 @@
   gap: 18px;
   padding-bottom: 24px;
   margin-bottom: 24px;
-  border-bottom: 1px solid #eeeaf3;
+  border-bottom: 1px solid #e8ece6;
 }
 
 .admin-profile-avatar {
@@ -49,8 +49,8 @@
   height: 76px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: #fdd5f4;
-  color: #c742b3;
+  background: #eaf3e9;
+  color: #47785b;
   font-size: 30px;
   font-weight: 700;
 }
@@ -61,7 +61,7 @@
 
 .admin-profile-banner p {
   margin: 0;
-  color: #777386;
+  color: #7e8980;
 }
 
 .admin-profile-card form h3 {
@@ -85,13 +85,13 @@
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
-  border: 1px solid #ddd7e8;
+  border: 1px solid #dfe7dc;
   border-radius: 8px;
   font: inherit;
 }
 
 .admin-profile-grid input:disabled {
-  background: #f7f6fa;
+  background: #f7faf8;
   color: #666;
   cursor: default;
 }
@@ -106,18 +106,18 @@
 }
 
 .profile-btn-primary {
-  background: #6d42c7;
+  background: #47785b;
   color: white;
   margin-right:210px ;
 }
 
 .profile-btn-primary:hover {
-  background: #5932ad;
+  background: #38664a;
 }
 
 .profile-btn-secondary {
-  background: #f0edf5;
-  color: #393347;
+  background: #eef5ee;
+  color: #45564a;
 }
 
 .admin-profile-actions {
@@ -135,7 +135,7 @@
 .profile-back-link {
   display: inline-block;
   margin-top: 26px;
-  color: #6d42c7;
+  color: #47785b;
   text-decoration: none;
 }
 

@@ -1,19 +1,17 @@
 
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap");
-
 :root {
-  --sd-primary: #a85c83;
-  --sd-primary-dark: #864568;
-  --sd-primary-light: #f8eaf1;
-  --sd-background: #fbf8fa;
+  --sd-primary: #47785b;
+  --sd-primary-dark: #38664a;
+  --sd-primary-light: #eaf3e9;
+  --sd-background: #f7f8f5;
   --sd-surface: #ffffff;
-  --sd-text: #342a33;
-  --sd-muted: #8b818b;
-  --sd-border: #eee6ec;
-  --sd-green: #e6f5ed;
-  --sd-yellow: #fff3d9;
-  --sd-purple: #eee9fb;
-  --sd-shadow: 0 5px 24px rgba(76, 43, 65, 0.045);
+  --sd-text: #26352e;
+  --sd-muted: #7e8980;
+  --sd-border: #e8ece6;
+  --sd-green: #e7f2e9;
+  --sd-yellow: #fff0dc;
+  --sd-purple: #f0eafa;
+  --sd-shadow: 0 5px 24px rgba(38, 53, 46, 0.045);
 }
 
 .sd-layout,
@@ -26,7 +24,7 @@
   min-height: 100vh;
   background: var(--sd-background);
   color: var(--sd-text);
-  font-family: "DM Sans", sans-serif;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
 /* Sidebar */
@@ -63,7 +61,7 @@
 
 .sd-brand h2 {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.5px;
@@ -83,7 +81,7 @@
   margin-bottom: 29px;
   border: 1px solid var(--sd-border);
   border-radius: 14px;
-  background: #fdfafd;
+  background: #fafcf9;
   min-width: 0;
 }
 
@@ -123,7 +121,7 @@
 .sd-nav-label {
   padding: 0 12px;
   margin: 0 0 12px;
-  color: #aaa0a9;
+  color: #a0a8a0;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1.4px;
@@ -145,7 +143,7 @@
   border: 0;
   border-radius: 11px;
   background: transparent;
-  color: #776c77;
+  color: #758078;
   font-family: inherit;
   font-size: 13px;
   font-weight: 500;
@@ -155,7 +153,7 @@
 }
 
 .sd-nav-item:hover {
-  background: #fcf4f8;
+  background: #f5f8f3;
   color: var(--sd-primary-dark);
 }
 
@@ -189,7 +187,7 @@
   padding: 15px;
   margin-bottom: 15px;
   border-radius: 13px;
-  background: #fcf4f8;
+  background: #f5f8f3;
 }
 
 .sd-sidebar-note span {
@@ -199,7 +197,7 @@
 
 .sd-sidebar-note p {
   margin: 8px 0 0;
-  color: #806c7b;
+  color: #758078;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -213,7 +211,7 @@
   border: 1px solid var(--sd-border);
   border-radius: 11px;
   background: white;
-  color: #756875;
+  color: #758078;
   font-family: inherit;
   font-size: 13px;
   cursor: pointer;
@@ -221,8 +219,8 @@
 }
 
 .sd-logout-button:hover {
-  background: #fff0f0;
-  color: #b64242;
+  background: #fff0ee;
+  color: #c45148;
 }
 
 .sd-logout-button span {
@@ -263,7 +261,7 @@
 
 .sd-topbar h2 {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 23px;
   font-weight: 800;
 }
@@ -278,7 +276,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #756a75;
+  color: #758078;
   font-size: 12px;
 }
 
@@ -318,9 +316,9 @@
   overflow: hidden;
   padding: 29px 30px;
   margin-bottom: 25px;
-  border: 1px solid #f0dce7;
+  border: 1px solid #e8eee9;
   border-radius: 19px;
-  background: linear-gradient(115deg, #f9eaf2, #fff7fa 68%, #f5eefa);
+  background: linear-gradient(115deg, #e8f2e8, #ffffff 68%, #f8f2e8);
 }
 
 .sd-welcome-card::after {
@@ -329,7 +327,7 @@
   right: -10px;
   width: 210px;
   height: 210px;
-  border: 35px solid rgba(168, 92, 131, 0.06);
+  border: 35px solid rgba(71, 120, 91, 0.06);
   border-radius: 50%;
   content: "";
   pointer-events: none;
@@ -345,7 +343,7 @@
   background: white;
   color: var(--sd-primary);
   font-size: 43px;
-  box-shadow: 0 5px 20px rgba(168, 92, 131, 0.08);
+  box-shadow: 0 5px 20px rgba(71, 120, 91, 0.08);
 }
 
 .sd-eyebrow {
@@ -361,7 +359,7 @@
 .sd-panel-heading h2,
 .sd-coming-soon h1 {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 25px;
   font-weight: 800;
 }
@@ -369,7 +367,7 @@
 .sd-welcome-card > div:last-child > p:last-child {
   max-width: 620px;
   margin: 9px 0 0;
-  color: #7c6b78;
+  color: #758078;
   font-size: 13px;
   line-height: 1.8;
 }
@@ -412,17 +410,17 @@
 
 .sd-purple {
   background: var(--sd-purple);
-  color: #7963b6;
+  color: #8b5cf6;
 }
 
 .sd-yellow {
   background: var(--sd-yellow);
-  color: #c28b2b;
+  color: #9a6b25;
 }
 
 .sd-green {
   background: var(--sd-green);
-  color: #42956b;
+  color: #438768;
 }
 
 .sd-stat-card p {
@@ -434,7 +432,7 @@
 
 .sd-stat-card h2 {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 27px;
   font-weight: 800;
 }
@@ -526,8 +524,8 @@
 
 .sd-quick-card:hover {
   transform: translateY(-2px);
-  border-color: #dfb6cc;
-  background: #fffbfd;
+  border-color: #d9e5d6;
+  background: #fafcf9;
 }
 
 .sd-quick-icon {
@@ -575,7 +573,7 @@
   align-items: flex-start;
   gap: 14px;
   padding: 15px 0;
-  border-bottom: 1px solid #f2edf1;
+  border-bottom: 1px solid #f0f2ee;
 }
 
 .sd-meal-row:first-child {
@@ -595,7 +593,7 @@
   height: 42px;
   border-radius: 13px;
   background: var(--sd-yellow);
-  color: #c28b2b;
+  color: #9a6b25;
   font-size: 22px;
 }
 
@@ -618,7 +616,7 @@
 
 .sd-meal-info p {
   margin: 3px 0 0;
-  color: #766b76;
+  color: #758078;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -637,14 +635,14 @@
   justify-content: center;
   min-height: 160px;
   padding: 25px;
-  border: 1px dashed #eadce5;
+  border: 1px dashed #d9e5d6;
   border-radius: 13px;
-  background: #fffcfe;
+  background: #fafcf9;
   text-align: center;
 }
 
 .sd-empty-state > span {
-  color: #d5a5bd;
+  color: #a8c5ae;
   font-size: 35px;
 }
 
@@ -658,10 +656,10 @@
 .sd-alert {
   padding: 13px 15px;
   margin-bottom: 20px;
-  border: 1px solid #f0caca;
+  border: 1px solid #f0d2ce;
   border-radius: 10px;
-  background: #fff2f2;
-  color: #a23d3d;
+  background: #fff5f3;
+  color: #a34139;
   font-size: 12px;
   line-height: 1.7;
 }
@@ -684,8 +682,8 @@
 }
 
 .sd-child-card:hover {
-  border-color: #e3bfd1;
-  box-shadow: 0 7px 20px rgba(76, 43, 65, 0.06);
+  border-color: #d9e5d6;
+  box-shadow: 0 7px 20px rgba(38, 53, 46, 0.06);
 }
 
 .sd-child-avatar {
@@ -697,14 +695,14 @@
   border-radius: 17px;
   background: var(--sd-primary-light);
   color: var(--sd-primary-dark);
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 22px;
   font-weight: 800;
 }
 
 .sd-child-card h3 {
   margin: 0 0 20px;
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 17px;
   overflow-wrap: anywhere;
 }
@@ -721,7 +719,7 @@
   gap: 5px;
   margin: 0;
   padding-bottom: 11px;
-  border-bottom: 1px solid #f3edf1;
+  border-bottom: 1px solid #f0f2ee;
 }
 
 .sd-child-details p:last-child {
@@ -757,8 +755,8 @@
 
 .sd-table th {
   padding: 14px 13px;
-  background: #fcf7fa;
-  color: #8c7d89;
+  background: #f5f8f3;
+  color: #758078;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -775,8 +773,8 @@
 
 .sd-table td {
   padding: 16px 13px;
-  border-bottom: 1px solid #f1eaf0;
-  color: #716572;
+  border-bottom: 1px solid #edf0eb;
+  color: #758078;
   line-height: 1.7;
 }
 
@@ -794,7 +792,7 @@
   padding: 5px 9px;
   border-radius: 7px;
   background: var(--sd-yellow);
-  color: #94691e;
+  color: #8a5a00;
   font-size: 10px;
   font-weight: 700;
 }
@@ -819,7 +817,7 @@
   margin-bottom: 22px;
   border-radius: 24px;
   background: var(--sd-green);
-  color: #42956b;
+  color: #438768;
   font-size: 36px;
 }
 
@@ -1074,9 +1072,9 @@
   gap: 20px;
   padding: 25px;
   margin-bottom: 30px;
-  border: 1px solid #f0dce7;
+  border: 1px solid #e8eee9;
   border-radius: 15px;
-  background: linear-gradient(110deg, #f9eaf2, #fff8fb);
+  background: linear-gradient(110deg, #e8f2e8, #f8f2e8);
 }
 
 .sd-profile-large-avatar {
@@ -1089,15 +1087,15 @@
   border-radius: 24px;
   background: var(--sd-primary-light);
   color: var(--sd-primary-dark);
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 32px;
   font-weight: 800;
-  box-shadow: 0 3px 12px rgba(168, 92, 131, 0.1);
+  box-shadow: 0 3px 12px rgba(71, 120, 91, 0.1);
 }
 
 .sd-profile-banner h2 {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 22px;
   font-weight: 800;
   overflow-wrap: anywhere;
@@ -1127,7 +1125,7 @@
 
 .sd-profile-section-heading h3 {
   margin: 0;
-  font-family: "Nunito", sans-serif;
+  font-family: inherit;
   font-size: 17px;
   font-weight: 800;
 }
@@ -1153,7 +1151,7 @@
 }
 
 .sd-profile-field > span {
-  color: #6f626f;
+  color: #45564a;
   font-size: 12px;
   font-weight: 700;
 }
@@ -1163,7 +1161,7 @@
   width: 100%;
   min-height: 45px;
   padding: 11px 13px;
-  border: 1px solid #e9dfe7;
+  border: 1px solid #dfe7dc;
   border-radius: 9px;
   outline: none;
   background: #fff;
@@ -1176,14 +1174,14 @@
 .sd-profile-field input:focus,
 .sd-profile-field select:focus {
   border-color: var(--sd-primary);
-  box-shadow: 0 0 0 3px rgba(168, 92, 131, 0.1);
+  box-shadow: 0 0 0 3px rgba(71, 120, 91, 0.16);
 }
 
 .sd-profile-field input:disabled,
 .sd-profile-field select:disabled {
-  border-color: #f0eaf0;
-  background: #faf8fa;
-  color: #756a75;
+  border-color: #eef2ef;
+  background: #f7faf8;
+  color: #78877e;
   opacity: 1;
   cursor: default;
 }
@@ -1199,10 +1197,10 @@
 
 .sd-profile-cancel-button {
   padding: 11px 17px;
-  border: 1px solid #e6dce5;
+  border: 1px solid #dce5de;
   border-radius: 10px;
   background: white;
-  color: #716572;
+  color: #758078;
   font-family: inherit;
   font-size: 12px;
   font-weight: 700;
@@ -1210,16 +1208,16 @@
 }
 
 .sd-profile-cancel-button:hover {
-  background: #faf6f9;
+  background: #f5f8f3;
 }
 
 .sd-profile-message {
   padding: 12px 14px;
   margin-bottom: 23px;
-  border: 1px solid #d7eadc;
+  border: 1px solid #dcece1;
   border-radius: 9px;
-  background: #f0faf3;
-  color: #34734a;
+  background: #e4f5e9;
+  color: #267452;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -1267,6 +1265,6 @@
 }
 
 .sd-topbar-avatar:focus-visible {
-  outline: 2px solid #a855f7;
+  outline: 2px solid #47785b;
   outline-offset: 3px;
 }

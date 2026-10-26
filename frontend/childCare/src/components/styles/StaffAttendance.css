@@ -1,8 +1,8 @@
 
 .staff-attendance-page {
     padding: 28px;
-    color: #443746;
-    background: #fffafd;
+    color: #26352e;
+    background: #f7f8f5;
     min-height: 100%;
 }
 
@@ -17,12 +17,12 @@
 .staff-attendance-heading h1 {
     margin: 0 0 7px;
     font-size: 27px;
-    color: #392d3b;
+    color: #2d3b32;
 }
 
 .staff-attendance-heading p {
     margin: 0;
-    color: #8c7d8e;
+    color: #7e8980;
     font-size: 14px;
 }
 
@@ -34,7 +34,7 @@
     gap: 8px;
     border: none;
     border-radius: 9px;
-    background: #e9a6c6;
+    background: #47785b;
     color: white;
     padding: 11px 15px;
     cursor: pointer;
@@ -60,9 +60,9 @@
     gap: 14px;
     background: white;
     padding: 20px;
-    border: 1px solid #f3e7ef;
+    border: 1px solid #e8ece6;
     border-radius: 14px;
-    box-shadow: 0 3px 12px rgba(96, 53, 81, 0.04);
+    box-shadow: 0 3px 12px rgba(38, 53, 46, 0.04);
 }
 
 .staff-summary-icon {
@@ -75,8 +75,8 @@
 }
 
 .staff-summary-icon.total {
-    color: #8d71c8;
-    background: #f0eaff;
+    color: #8b5cf6;
+    background: #f0eafa;
 }
 
 .staff-summary-icon.present {
@@ -96,20 +96,20 @@
 
 .staff-summary-card p {
     margin: 0 0 6px;
-    color: #8c7d8e;
+    color: #7e8980;
     font-size: 13px;
 }
 
 .staff-summary-card h2 {
     margin: 0;
     font-size: 25px;
-    color: #443746;
+    color: #26352e;
 }
 
 .staff-attendance-card {
     overflow: hidden;
     background: white;
-    border: 1px solid #f3e7ef;
+    border: 1px solid #e8ece6;
     border-radius: 14px;
     box-shadow: 0 3px 12px rgba(96, 53, 81, 0.04);
 }
@@ -120,7 +120,7 @@
     justify-content: space-between;
     gap: 16px;
     padding: 20px;
-    border-bottom: 1px solid #f4eaf1;
+    border-bottom: 1px solid #edf0eb;
 }
 
 .staff-attendance-search,
@@ -128,9 +128,9 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #9b8498;
-    background: #fffafd;
-    border: 1px solid #f0e3ed;
+    color: #89948b;
+    background: #fafcf9;
+    border: 1px solid #dfe7dc;
     border-radius: 9px;
     padding: 10px 12px;
 }
@@ -145,7 +145,7 @@
     border: none;
     outline: none;
     background: transparent;
-    color: #443746;
+    color: #26352e;
     font: inherit;
 }
 
@@ -170,12 +170,12 @@
 }
 
 .staff-attendance-table thead {
-    background: #fff7fb;
+    background: #f5f8f3;
 }
 
 .staff-attendance-table th {
     padding: 15px 16px;
-    color: #8c7185;
+    color: #758078;
     font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
@@ -183,7 +183,7 @@
 
 .staff-attendance-table td {
     padding: 15px 16px;
-    border-top: 1px solid #f5edf3;
+    border-top: 1px solid #edf0eb;
     font-size: 13px;
 }
 
@@ -201,8 +201,8 @@
     height: 38px;
     flex-shrink: 0;
     border-radius: 50%;
-    background: #f9e2ee;
-    color: #b85f8c;
+    background: #eaf3e9;
+    color: #47785b;
     font-weight: 700;
 }
 
@@ -212,13 +212,13 @@
 }
 
 .staff-member-cell strong {
-    color: #443746;
+    color: #26352e;
     font-size: 13px;
 }
 
 .staff-member-cell span {
     margin-top: 4px;
-    color: #9b8b9a;
+    color: #89948b;
     font-size: 11px;
 }
 
@@ -250,26 +250,26 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #a28b9d;
+    color: #89948b;
     min-width: 115px;
 }
 
 .staff-time-input input {
     width: 100px;
-    border: 1px solid #f0e3ed;
+    border: 1px solid #edf0eb;
     border-radius: 7px;
     padding: 8px 6px;
     font: inherit;
-    color: #443746;
+    color: #26352e;
     background: white;
 }
 
 .staff-notes-input {
     width: 130px;
-    border: 1px solid #f0e3ed;
+    border: 1px solid #edf0eb;
     border-radius: 7px;
     padding: 9px;
-    outline-color: #e9a6c6;
+    outline-color: #47785b;
     font: inherit;
     font-size: 12px;
 }
@@ -300,7 +300,7 @@
 .staff-attendance-empty {
     padding: 45px 20px;
     text-align: center;
-    color: #968596;
+    color: #89948b;
 }
 
 .staff-attendance-footer {
@@ -309,8 +309,8 @@
     align-items: center;
     gap: 12px;
     padding: 16px 20px;
-    border-top: 1px solid #f4eaf1;
-    color: #958493;
+    border-top: 1px solid #edf0eb;
+    color: #89948b;
     font-size: 12px;
 }
 

@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../components/styles/StaffDashboard.css";
+import {Heart} from "lucide-react"
 
 const API_URL = "http://localhost:5165/api";
 
@@ -592,14 +593,17 @@ const navigation = [
     <div className="sd-layout">
       <aside className="sd-sidebar">
         <div className="sd-brand">
-          <div className="sd-brand-icon">♡</div>
           <div>
-            <h2>Cuddle Care</h2>
+            <div className="side-header-left">
+            <Heart size={30} />
+            <h2>
+              Cuddle <span>Care</span>
+            </h2>
+            </div>
             <p>Staff Portal</p>
           </div>
         </div>
 
-        <p className="sd-nav-label">WORKSPACE</p>
 
         <nav className="sd-navigation">
           {navigation.map((item) => (

@@ -33,7 +33,7 @@ function Sidebar() {
         <div className="side-header-left">
           <Heart size={30} />
           <h2>
-            Child <span>Care</span>
+            Cuddle <span>Care</span>
           </h2>
         </div>
 

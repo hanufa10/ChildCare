@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import "../components/styles/ParentDashboard.css";
+import "../components/styles/ParentDashboard2.css";
 import {
   LayoutDashboard,
   Baby,
@@ -8,6 +8,7 @@ import {
   Megaphone,
   MessageSquare,
   CreditCard,
+  Heart
 } from "lucide-react";
 
 const API_URL = "http://localhost:5165/api";
@@ -126,7 +127,6 @@ async function fetchApi(path, token, options = {}) {
     },
   });
 
-  
   if (!response.ok) {
     let message = `Request failed (${response.status}).`;
 
@@ -145,10 +145,7 @@ async function fetchApi(path, token, options = {}) {
           .join("\n");
       } else {
         message =
-          errorBody.message ||
-          errorBody.title ||
-          errorBody.detail ||
-          message;
+          errorBody.message || errorBody.title || errorBody.detail || message;
       }
     } catch {
       // The API may return an empty or non-JSON response.
@@ -171,7 +168,6 @@ async function fetchApi(path, token, options = {}) {
     throw new Error(message);
   }
 
-
   if (response.status === 204) return null;
 
   const contentType = response.headers.get("content-type") || "";
@@ -185,16 +181,15 @@ async function fetchApi(path, token, options = {}) {
 function ParentDashboard() {
   const [activePage, setActivePage] = useState("overview");
   const [selectedDate, setSelectedDate] = useState("all");
-  
-const [invoices, setInvoices] = useState([]);
-const [payments, setPayments] = useState([]);
 
-const [paymentsLoading, setPaymentsLoading] = useState(true);
-const [paymentsError, setPaymentsError] = useState("");
-const [paymentMessage, setPaymentMessage] = useState("");
-const [payingInvoiceId, setPayingInvoiceId] = useState(null);
+  const [invoices, setInvoices] = useState([]);
+  const [payments, setPayments] = useState([]);
 
-  
+  const [paymentsLoading, setPaymentsLoading] = useState(true);
+  const [paymentsError, setPaymentsError] = useState("");
+  const [paymentMessage, setPaymentMessage] = useState("");
+  const [payingInvoiceId, setPayingInvoiceId] = useState(null);
+
   const [user] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("authUser") || "null");
@@ -204,27 +199,26 @@ const [payingInvoiceId, setPayingInvoiceId] = useState(null);
   });
 
   const token = localStorage.getItem("authToken");
-  
-const [profile, setProfile] = useState(() => {
-  const savedUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("authUser") || "{}");
-    } catch {
-      return {};
-    }
-  })();
 
-  return {
-    firstName: savedUser.firstName || savedUser.FirstName || "",
-    lastName: savedUser.lastName || savedUser.LastName || "",
-    email: savedUser.email || savedUser.Email || "",
-    phoneNumber: savedUser.phoneNumber || savedUser.PhoneNumber || "",
-  };
-});
+  const [profile, setProfile] = useState(() => {
+    const savedUser = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("authUser") || "{}");
+      } catch {
+        return {};
+      }
+    })();
 
-const [isEditingProfile, setIsEditingProfile] = useState(false);
-const [profileMessage, setProfileMessage] = useState("");
+    return {
+      firstName: savedUser.firstName || savedUser.FirstName || "",
+      lastName: savedUser.lastName || savedUser.LastName || "",
+      email: savedUser.email || savedUser.Email || "",
+      phoneNumber: savedUser.phoneNumber || savedUser.PhoneNumber || "",
+    };
+  });
 
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileMessage, setProfileMessage] = useState("");
 
   const [children, setChildren] = useState([]);
   const [meals, setMeals] = useState([]);
@@ -255,12 +249,11 @@ const [profileMessage, setProfileMessage] = useState("");
   const [complaintSubmitting, setComplaintSubmitting] = useState(false);
   const [complaintSuccess, setComplaintSuccess] = useState("");
 
-  
-const parentName =
-  `${profile.firstName} ${profile.lastName}`.trim() ||
-  user?.name ||
-  user?.Name ||
-  "Parent";
+  const parentName =
+    `${profile.firstName} ${profile.lastName}`.trim() ||
+    user?.name ||
+    user?.Name ||
+    "Parent";
 
   const loadChildren = useCallback(async () => {
     setChildrenLoading(true);
@@ -298,98 +291,93 @@ const parentName =
     }
   }, [token]);
   const loadAnnouncements = useCallback(async () => {
-  setAnnouncementsLoading(true);
-  setAnnouncementsError("");
+    setAnnouncementsLoading(true);
+    setAnnouncementsError("");
 
-  try {
-    if (!token) {
-      throw new Error("Please log in to view announcements.");
+    try {
+      if (!token) {
+        throw new Error("Please log in to view announcements.");
+      }
+
+      const data = await fetchApi("/Announcements", token);
+      setAnnouncements(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setAnnouncements([]);
+      setAnnouncementsError(error.message || "Unable to load announcements.");
+    } finally {
+      setAnnouncementsLoading(false);
     }
+  }, [token]);
+  useEffect(() => {
+    loadAnnouncements();
+  }, [loadAnnouncements, refreshKey]);
 
-    const data = await fetchApi("/Announcements", token);
-    setAnnouncements(Array.isArray(data) ? data : []);
-  } catch (error) {
-    setAnnouncements([]);
-    setAnnouncementsError(
-      error.message || "Unable to load announcements."
-    );
-  } finally {
-    setAnnouncementsLoading(false);
-  }
-}, [token]);
-useEffect(() => {
-  loadAnnouncements();
-}, [loadAnnouncements, refreshKey]);
+  const loadPayments = useCallback(async () => {
+    setPaymentsLoading(true);
+    setPaymentsError("");
 
+    try {
+      if (!token) {
+        throw new Error("Please log in to view your payments.");
+      }
 
-const loadPayments = useCallback(async () => {
-  setPaymentsLoading(true);
-  setPaymentsError("");
+      const [invoiceData, paymentData] = await Promise.all([
+        fetchApi("/Invoices/mine", token),
+        fetchApi("/Payments/mine", token),
+      ]);
 
-  try {
-    if (!token) {
-      throw new Error("Please log in to view your payments.");
+      setInvoices(Array.isArray(invoiceData) ? invoiceData : []);
+      setPayments(Array.isArray(paymentData) ? paymentData : []);
+    } catch (error) {
+      setPaymentsError(
+        error.message || "Unable to load your payment information.",
+      );
+    } finally {
+      setPaymentsLoading(false);
     }
+  }, [token]);
 
-    const [invoiceData, paymentData] = await Promise.all([
-      fetchApi("/Invoices/mine", token),
-      fetchApi("/Payments/mine", token),
-    ]);
+  useEffect(() => {
+    loadPayments();
+  }, [loadPayments, refreshKey]);
 
-    setInvoices(Array.isArray(invoiceData) ? invoiceData : []);
-    setPayments(Array.isArray(paymentData) ? paymentData : []);
-  } catch (error) {
-    setPaymentsError(
-      error.message || "Unable to load your payment information."
-    );
-  } finally {
-    setPaymentsLoading(false);
-  }
-}, [token]);
+  const handleMockPayment = async (invoice, method) => {
+    const invoiceId = getValue(invoice, "id", "Id");
 
-useEffect(() => {
-  loadPayments();
-}, [loadPayments, refreshKey]);
+    if (!invoiceId || payingInvoiceId !== null) return;
 
-const handleMockPayment = async (invoice, method) => {
-  const invoiceId = getValue(invoice, "id", "Id");
+    setPayingInvoiceId(invoiceId);
+    setPaymentMessage("");
+    setPaymentsError("");
 
-  if (!invoiceId || payingInvoiceId !== null) return;
+    try {
+      const result = await fetchApi("/Payments/initiate", token, {
+        method: "POST",
+        body: JSON.stringify({
+          invoiceId,
+          // The backend enum is:
+          // MockMobileMoney = 0, MockCard = 1.
+          method,
+        }),
+      });
 
-  setPayingInvoiceId(invoiceId);
-  setPaymentMessage("");
-  setPaymentsError("");
+      const status = getValue(result, "status", "Status");
+      const message = getValue(result, "message", "Message");
 
-  try {
-    const result = await fetchApi("/Payments/initiate", token, {
-      method: "POST",
-      body: JSON.stringify({
-        invoiceId,
-        // The backend enum is:
-        // MockMobileMoney = 0, MockCard = 1.
-        method,
-      }),
-    });
+      setPaymentMessage(
+        message ||
+          (status === "Succeeded"
+            ? "Mock payment successful."
+            : "Payment attempt completed."),
+      );
 
-    const status = getValue(result, "status", "Status");
-    const message = getValue(result, "message", "Message");
-
-    setPaymentMessage(
-      message ||
-        (status === "Succeeded"
-          ? "Mock payment successful."
-          : "Payment attempt completed.")
-    );
-
-    await loadPayments();
-  } catch (error) {
-    setPaymentsError(
-      error.message || "Unable to process the mock payment."
-    );
-  } finally {
-    setPayingInvoiceId(null);
-  }
-};
+      await loadPayments();
+    } catch (error) {
+      setPaymentsError(error.message || "Unable to process the mock payment.");
+    } finally {
+      setPayingInvoiceId(null);
+    }
+  };
 
   const loadMeals = useCallback(async () => {
     setMealsLoading(true);
@@ -509,234 +497,222 @@ const handleMockPayment = async (invoice, method) => {
       <p>{message}</p>
     </div>
   );
-  
-const renderPayments = () => {
-  const unpaidInvoices = invoices.filter(
-    (invoice) =>
-      String(getValue(invoice, "status", "Status"))
-        .toLowerCase() === "unpaid"
-  );
 
-  const totalOutstanding = unpaidInvoices.reduce(
-    (total, invoice) =>
-      total + Number(getValue(invoice, "amount", "Amount") || 0),
-    0
-  );
+  const renderPayments = () => {
+    const unpaidInvoices = invoices.filter(
+      (invoice) =>
+        String(getValue(invoice, "status", "Status")).toLowerCase() ===
+        "unpaid",
+    );
 
-  const formatMoney = (amount) =>
-    new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "ETB",
-    }).format(Number(amount || 0));
+    const totalOutstanding = unpaidInvoices.reduce(
+      (total, invoice) =>
+        total + Number(getValue(invoice, "amount", "Amount") || 0),
+      0,
+    );
 
-  return (
-    <section className="pc-payments-page">
-      <div className="pc-card pc-payments-summary">
-        <div>
-          <p className="pc-muted">Outstanding balance</p>
-          <h2>{formatMoney(totalOutstanding)}</h2>
-          <p className="pc-muted">
-            {unpaidInvoices.length} unpaid{" "}
-            {unpaidInvoices.length === 1 ? "invoice" : "invoices"}
-          </p>
-        </div>
-        <div className="pc-payment-summary-icon" aria-hidden="true">
-          💳
-        </div>
-      </div>
+    const formatMoney = (amount) =>
+      new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: "ETB",
+      }).format(Number(amount || 0));
 
-      {paymentMessage && (
-        <p className="pc-edit-success" role="status">
-          {paymentMessage}
-        </p>
-      )}
-
-      {paymentsError && (
-        <div className="pc-error" role="alert">
-          <p>{paymentsError}</p>
-          <button
-            type="button"
-            className="pc-button pc-button-secondary"
-            onClick={loadPayments}
-          >
-            Try again
-          </button>
-        </div>
-      )}
-
-      <section className="pc-card">
-        <h2 className={styles.sectionTitle}>Outstanding Invoices</h2>
-        <p className="pc-muted pc-section-description">
-          Review your daycare fees and choose a mock payment method.
-        </p>
-
-        {paymentsLoading ? (
-          renderLoading("Loading invoices...")
-        ) : unpaidInvoices.length === 0 ? (
-          renderEmpty("You have no outstanding invoices.")
-        ) : (
-          <div className="pc-payment-list">
-            {unpaidInvoices.map((invoice) => {
-              const id = getValue(invoice, "id", "Id");
-              const childName =
-                getValue(invoice, "childName", "ChildName") || "Child";
-              const description =
-                getValue(invoice, "description", "Description") ||
-                "Daycare fee";
-              const amount = getValue(invoice, "amount", "Amount");
-              const dueDate = getValue(invoice, "dueDate", "DueDate");
-              const isPaying = payingInvoiceId === id;
-
-              return (
-                <article className="pc-payment-card" key={id}>
-                  <div className="pc-payment-card-top">
-                    <div>
-                      <span className="pc-payment-label">
-                        INVOICE #{id}
-                      </span>
-                      <h3>{description}</h3>
-                      <p className="pc-muted">
-                        Child: {childName}
-                      </p>
-                      <p className="pc-muted">
-                        Due: {formatDate(dueDate)}
-                      </p>
-                    </div>
-
-                    <div className="pc-payment-amount">
-                      {formatMoney(amount)}
-                    </div>
-                  </div>
-
-                  <div className="pc-payment-actions">
-                    <button
-                      type="button"
-                      className="pc-button pc-button-primary"
-                      disabled={payingInvoiceId !== null}
-                      onClick={() => handleMockPayment(invoice, 0)}
-                    >
-                      {isPaying
-                        ? "Processing..."
-                        : "📱 Mock Mobile Money"}
-                    </button>
-
-                    <button
-                      type="button"
-                      className="pc-button pc-button-secondary"
-                      disabled={payingInvoiceId !== null}
-                      onClick={() => handleMockPayment(invoice, 1)}
-                    >
-                      💳 Mock Card
-                    </button>
-                  </div>
-
-                  <p className="pc-payment-disclaimer">
-                    Demonstration only. No real money will be charged.
-                  </p>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section className="pc-card pc-payment-history">
-        <div className="pc-card-heading">
+    return (
+      <section className="pc-payments-page">
+        <div className="pc-card pc-payments-summary">
           <div>
-            <h2 className={styles.sectionTitle}>Payment History</h2>
+            <p className="pc-muted">Outstanding balance</p>
+            <h2>{formatMoney(totalOutstanding)}</h2>
             <p className="pc-muted">
-              Your previous payment attempts and their results.
+              {unpaidInvoices.length} unpaid{" "}
+              {unpaidInvoices.length === 1 ? "invoice" : "invoices"}
             </p>
           </div>
-
-          <button
-            type="button"
-            className="pc-button pc-button-secondary"
-            onClick={loadPayments}
-            disabled={paymentsLoading}
-          >
-            ↻ Refresh
-          </button>
+          <div className="pc-payment-summary-icon" aria-hidden="true">
+            💳
+          </div>
         </div>
 
-        {paymentsLoading ? (
-          renderLoading("Loading payment history...")
-        ) : payments.length === 0 ? (
-          renderEmpty("You have no payment history yet.")
-        ) : (
-          <div className="pc-payment-history-list">
-            {payments.map((payment) => {
-              const id = getValue(payment, "id", "Id");
-              const description =
-                getValue(
-                  payment,
-                  "invoiceDescription",
-                  "InvoiceDescription"
-                ) || `Invoice #${getValue(payment, "invoiceId", "InvoiceId")}`;
-              const childName =
-                getValue(payment, "childName", "ChildName") || "Child";
-              const amount = getValue(payment, "amount", "Amount");
-              const method = getValue(payment, "method", "Method");
-              const status = getValue(payment, "status", "Status");
-              const reference = getValue(
-                payment,
-                "transactionReference",
-                "TransactionReference"
-              );
-              const createdAt = getValue(
-                payment,
-                "createdAt",
-                "CreatedAt"
-              );
-              const failureReason = getValue(
-                payment,
-                "failureReason",
-                "FailureReason"
-              );
+        {paymentMessage && (
+          <p className="pc-edit-success" role="status">
+            {paymentMessage}
+          </p>
+        )}
 
-              return (
-                <article className="pc-payment-history-item" key={id}>
-                  <div className="pc-payment-history-main">
-                    <h3>{description}</h3>
-                    <p className="pc-muted">{childName}</p>
-                    <p className="pc-muted">
-                      {formatDate(createdAt)} ·{" "}
-                      {method === "0"
-                        ? "Mock Mobile Money"
-                        : method === "1"
-                          ? "Mock Card"
-                          : method || "Payment method"}
-                    </p>
-                    {reference && (
-                      <p className="pc-payment-reference">
-                        Reference: {reference}
-                      </p>
-                    )}
-                    {failureReason && (
-                      <p className="pc-payment-failure">
-                        {failureReason}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="pc-payment-history-end">
-                    <strong>{formatMoney(amount)}</strong>
-                    <span
-                      className={`pc-payment-status ${String(status || "Pending")
-                        .toLowerCase()}`}
-                    >
-                      {status || "Pending"}
-                    </span>
-                  </div>
-                </article>
-              );
-            })}
+        {paymentsError && (
+          <div className="pc-error" role="alert">
+            <p>{paymentsError}</p>
+            <button
+              type="button"
+              className="pc-button pc-button-secondary"
+              onClick={loadPayments}
+            >
+              Try again
+            </button>
           </div>
         )}
+
+        <section className="pc-card">
+          <h2 className={styles.sectionTitle}>Outstanding Invoices</h2>
+          <p className="pc-muted pc-section-description">
+            Review your daycare fees and choose a mock payment method.
+          </p>
+
+          {paymentsLoading ? (
+            renderLoading("Loading invoices...")
+          ) : unpaidInvoices.length === 0 ? (
+            renderEmpty("You have no outstanding invoices.")
+          ) : (
+            <div className="pc-payment-list">
+              {unpaidInvoices.map((invoice) => {
+                const id = getValue(invoice, "id", "Id");
+                const childName =
+                  getValue(invoice, "childName", "ChildName") || "Child";
+                const description =
+                  getValue(invoice, "description", "Description") ||
+                  "Daycare fee";
+                const amount = getValue(invoice, "amount", "Amount");
+                const dueDate = getValue(invoice, "dueDate", "DueDate");
+                const isPaying = payingInvoiceId === id;
+
+                return (
+                  <article className="pc-payment-card" key={id}>
+                    <div className="pc-payment-card-top">
+                      <div>
+                        <span className="pc-payment-label">INVOICE #{id}</span>
+                        <h3>{description}</h3>
+                        <p className="pc-muted">Child: {childName}</p>
+                        <p className="pc-muted">Due: {formatDate(dueDate)}</p>
+                      </div>
+
+                      <div className="pc-payment-amount">
+                        {formatMoney(amount)}
+                      </div>
+                    </div>
+
+                    <div className="pc-payment-actions">
+                      <button
+                        type="button"
+                        className="pc-button pc-button-primary"
+                        disabled={payingInvoiceId !== null}
+                        onClick={() => handleMockPayment(invoice, 0)}
+                      >
+                        {isPaying ? "Processing..." : "📱 Mock Mobile Money"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className="pc-button pc-button-secondary"
+                        disabled={payingInvoiceId !== null}
+                        onClick={() => handleMockPayment(invoice, 1)}
+                      >
+                        💳 Mock Card
+                      </button>
+                    </div>
+
+                    <p className="pc-payment-disclaimer">
+                      Demonstration only. No real money will be charged.
+                    </p>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="pc-card pc-payment-history">
+          <div className="pc-card-heading">
+            <div>
+              <h2 className={styles.sectionTitle}>Payment History</h2>
+              <p className="pc-muted">
+                Your previous payment attempts and their results.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              className="pc-button pc-button-secondary"
+              onClick={loadPayments}
+              disabled={paymentsLoading}
+            >
+              ↻ Refresh
+            </button>
+          </div>
+
+          {paymentsLoading ? (
+            renderLoading("Loading payment history...")
+          ) : payments.length === 0 ? (
+            renderEmpty("You have no payment history yet.")
+          ) : (
+            <div className="pc-payment-history-list">
+              {payments.map((payment) => {
+                const id = getValue(payment, "id", "Id");
+                const description =
+                  getValue(
+                    payment,
+                    "invoiceDescription",
+                    "InvoiceDescription",
+                  ) ||
+                  `Invoice #${getValue(payment, "invoiceId", "InvoiceId")}`;
+                const childName =
+                  getValue(payment, "childName", "ChildName") || "Child";
+                const amount = getValue(payment, "amount", "Amount");
+                const method = getValue(payment, "method", "Method");
+                const status = getValue(payment, "status", "Status");
+                const reference = getValue(
+                  payment,
+                  "transactionReference",
+                  "TransactionReference",
+                );
+                const createdAt = getValue(payment, "createdAt", "CreatedAt");
+                const failureReason = getValue(
+                  payment,
+                  "failureReason",
+                  "FailureReason",
+                );
+
+                return (
+                  <article className="pc-payment-history-item" key={id}>
+                    <div className="pc-payment-history-main">
+                      <h3>{description}</h3>
+                      <p className="pc-muted">{childName}</p>
+                      <p className="pc-muted">
+                        {formatDate(createdAt)} ·{" "}
+                        {method === "0"
+                          ? "Mock Mobile Money"
+                          : method === "1"
+                            ? "Mock Card"
+                            : method || "Payment method"}
+                      </p>
+                      {reference && (
+                        <p className="pc-payment-reference">
+                          Reference: {reference}
+                        </p>
+                      )}
+                      {failureReason && (
+                        <p className="pc-payment-failure">{failureReason}</p>
+                      )}
+                    </div>
+
+                    <div className="pc-payment-history-end">
+                      <strong>{formatMoney(amount)}</strong>
+                      <span
+                        className={`pc-payment-status ${String(
+                          status || "Pending",
+                        ).toLowerCase()}`}
+                      >
+                        {status || "Pending"}
+                      </span>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </section>
-    </section>
-  );
-};
+    );
+  };
 
   const renderMealList = (items) => {
     if (mealsLoading) return renderLoading("Loading meals...");
@@ -1207,10 +1183,11 @@ const renderPayments = () => {
       ) : filteredMeals.length === 0 ? (
         renderEmpty(
           selectedDate === today
-          ? "No meal plan for today."
-          : selectedDate === "all"
-          ? "No meals have been scheduled yet."
-          :"No meals have been scheduled yet.")
+            ? "No meal plan for today."
+            : selectedDate === "all"
+              ? "No meals have been scheduled yet."
+              : "No meals have been scheduled yet.",
+        )
       ) : (
         <div className="pc-meals-by-date">
           {Object.entries(
@@ -1255,418 +1232,403 @@ const renderPayments = () => {
     </section>
   );
 
-
-const renderAnnouncements = () => (
-  <section className={styles.card}>
-    <h2 className={styles.sectionTitle}>Announcements</h2>
-    <p className="pc-muted pc-section-description">
-      Important updates and messages from your daycare.
-    </p>
-
-    {announcementsLoading ? (
-      renderLoading("Loading announcements...")
-    ) : announcementsError ? (
-      renderError(announcementsError, loadAnnouncements)
-    ) : announcements.length === 0 ? (
-      renderEmpty("There are no announcements available right now.")
-    ) : (
-      <div className="pc-announcements-list">
-        {announcements.map((announcement) => {
-          const id = getValue(announcement, "id", "Id");
-          const title =
-            getValue(announcement, "title", "Title") ||
-            "Untitled announcement";
-          const message =
-            getValue(announcement, "message", "Message") || "";
-          const createdAt = getValue(
-            announcement,
-            "createdAt",
-            "CreatedAt"
-          );
-
-          return (
-            <article className="pc-announcement-card" key={id}>
-              <div className="pc-announcement-icon" aria-hidden="true">
-                📣
-              </div>
-
-              <div className="pc-announcement-content">
-                <h3>{title}</h3>
-                <p className="pc-announcement-date">
-                  {formatDate(createdAt)}
-                </p>
-                <p className="pc-announcement-message">{message}</p>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-    )}
-  </section>
-);
-
-const loadComplaints = useCallback(async () => {
-  setComplaintsLoading(true);
-  setComplaintsError("");
-
-  try {
-    if (!token) {
-      throw new Error("Please log in to view your complaints.");
-    }
-
-    const data = await fetchApi("/Complaints/mine", token);
-    setComplaints(Array.isArray(data) ? data : []);
-  } catch (error) {
-    setComplaints([]);
-    setComplaintsError(
-      error.message || "Unable to load your complaints."
-    );
-  } finally {
-    setComplaintsLoading(false);
-  }
-}, [token]);
-
-useEffect(() => {
-  loadComplaints();
-}, [loadComplaints, refreshKey]);
-
-const submitComplaint = async (event) => {
-  event.preventDefault();
-
-  if (!complaintSubject.trim() || !complaintDescription.trim()) {
-    setComplaintsError("Please enter a subject and description.");
-    return;
-  }
-
-  setComplaintSubmitting(true);
-  setComplaintsError("");
-  setComplaintSuccess("");
-
-  try {
-    await fetchApi("/Complaints", token, {
-      method: "POST",
-      body: JSON.stringify({
-        subject: complaintSubject.trim(),
-        description: complaintDescription.trim(),
-      }),
-    });
-
-    setComplaintSubject("");
-    setComplaintDescription("");
-    setComplaintSuccess("Your complaint was submitted successfully.");
-
-    await loadComplaints();
-  } catch (error) {
-    setComplaintsError(
-      error.message || "Unable to submit your complaint."
-    );
-  } finally {
-    setComplaintSubmitting(false);
-  }
-};
-
-const renderComplaints = () => (
-  <section className={styles.card}>
-    <h2 className={styles.sectionTitle}>Complaints & Feedback</h2>
-    <p className="pc-muted pc-section-description">
-      Share a concern with the daycare administration and follow its progress.
-    </p>
-
-    <form className="pc-complaint-form" onSubmit={submitComplaint}>
-      <label>
-        Subject
-        <input
-          value={complaintSubject}
-          onChange={(event) => setComplaintSubject(event.target.value)}
-          placeholder="Briefly describe your concern"
-          maxLength={200}
-          required
-        />
-      </label>
-
-      <label>
-        Description
-        <textarea
-          value={complaintDescription}
-          onChange={(event) =>
-            setComplaintDescription(event.target.value)
-          }
-          placeholder="Explain your concern in detail..."
-          rows={5}
-          maxLength={5000}
-          required
-        />
-      </label>
-
-      {complaintsError && (
-        <p className="pc-error" role="alert">{complaintsError}</p>
-      )}
-
-      {complaintSuccess && (
-        <p className="pc-edit-success" role="status">
-          {complaintSuccess}
-        </p>
-      )}
-
-      <button
-        type="submit"
-        className="pc-button pc-button-primary"
-        disabled={complaintSubmitting}
-      >
-        {complaintSubmitting ? "Submitting..." : "Submit Complaint"}
-      </button>
-    </form>
-
-    <div className="pc-complaints-history">
-      <h3 className={styles.sectionTitle}>My Submitted Complaints</h3>
-
-      {complaintsLoading ? (
-        renderLoading("Loading your complaints...")
-      ) : complaintsError && complaints.length === 0 ? (
-        renderError(complaintsError, loadComplaints)
-      ) : complaints.length === 0 ? (
-        renderEmpty("You have not submitted any complaints yet.")
-      ) : (
-        complaints.map((complaint) => {
-          const id = getValue(complaint, "id", "Id");
-          const subject = getValue(complaint, "subject", "Subject");
-          const description = getValue(
-            complaint, "description", "Description"
-          );
-          const status =
-            getValue(complaint, "status", "Status") || "Pending";
-          const response = getValue(
-            complaint, "adminResponse", "AdminResponse"
-          );
-          const createdAt = getValue(
-            complaint, "createdAt", "CreatedAt"
-          );
-
-          return (
-            <article className="pc-complaint-card" key={id}>
-              <div className="pc-complaint-heading">
-                <h4>{subject}</h4>
-                <span
-                  className={`pc-complaint-status ${String(status)
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`}
-                >
-                  {status}
-                </span>
-              </div>
-
-              <p className="pc-complaint-date">
-                Submitted: {formatDate(createdAt)}
-              </p>
-              <p>{description}</p>
-
-              {response && (
-                <div className="pc-complaint-response">
-                  <strong>Daycare response</strong>
-                  <p>{response}</p>
-                </div>
-              )}
-            </article>
-          );
-        })
-      )}
-    </div>
-  </section>
-);
-
-
-const handleProfileChange = (event) => {
-  const { name, value } = event.target;
-
-  setProfile((current) => ({
-    ...current,
-    [name]: value,
-  }));
-};
-
-const handleProfileCancel = () => {
-  const savedUser = (() => {
-    try {
-      return JSON.parse(localStorage.getItem("authUser") || "{}");
-    } catch {
-      return {};
-    }
-  })();
-
-  setProfile({
-    firstName: savedUser.firstName || savedUser.FirstName || "",
-    lastName: savedUser.lastName || savedUser.LastName || "",
-    email: savedUser.email || savedUser.Email || "",
-    phoneNumber:
-      savedUser.phoneNumber || savedUser.PhoneNumber || "",
-  });
-
-  setProfileMessage("");
-  setIsEditingProfile(false);
-};
-
-const handleProfileSave = (event) => {
-  event.preventDefault();
-
-  const firstName = profile.firstName.trim();
-  const lastName = profile.lastName.trim();
-  const email = profile.email.trim();
-  const phoneNumber = profile.phoneNumber.trim();
-
-  if (!firstName || !lastName || !email) {
-    setProfileMessage("First name, last name, and email are required.");
-    return;
-  }
-
-  try {
-    const savedUser = JSON.parse(
-      localStorage.getItem("authUser") || "{}"
-    );
-
-    const updatedUser = {
-      ...savedUser,
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-    };
-
-    localStorage.setItem("authUser", JSON.stringify(updatedUser));
-
-    setProfile({
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-    });
-
-    setProfileMessage("Profile saved in this browser.");
-    setIsEditingProfile(false);
-    window.dispatchEvent(new Event("authChanged"));
-  } catch {
-    setProfileMessage("Unable to save your profile. Please try again.");
-  }
-};
-
-const renderProfile = () => (
-  <section className="pc-card pc-profile-page">
-    <div className="pc-card-heading">
-      <div>
-        <h2 className={styles.sectionTitle}>My Profile</h2>
-        <p className="pc-muted">
-          View and manage your personal information.
-        </p>
-      </div>
-
-      {!isEditingProfile && (
-        <button
-          type="button"
-          className="pc-button pc-button-primary"
-          onClick={() => {
-            setProfileMessage("");
-            setIsEditingProfile(true);
-          }}
-        >
-          Edit Profile
-        </button>
-      )}
-    </div>
-
-    <div className="pc-parent-profile-banner">
-      <div className="pc-parent-profile-avatar">
-        {profile.firstName.charAt(0).toUpperCase() || "P"}
-      </div>
-
-      <div>
-        <h2>
-          {profile.firstName} {profile.lastName}
-        </h2>
-        <p>Parent Account</p>
-      </div>
-    </div>
-
-    {profileMessage && (
-      <p className="pc-edit-success" role="status">
-        {profileMessage}
+  const renderAnnouncements = () => (
+    <section className={styles.card}>
+      <h2 className={styles.sectionTitle}>Announcements</h2>
+      <p className="pc-muted pc-section-description">
+        Important updates and messages from your daycare.
       </p>
-    )}
 
-    <form onSubmit={handleProfileSave}>
-      <h3 className={styles.sectionTitle}>Personal Information</h3>
+      {announcementsLoading ? (
+        renderLoading("Loading announcements...")
+      ) : announcementsError ? (
+        renderError(announcementsError, loadAnnouncements)
+      ) : announcements.length === 0 ? (
+        renderEmpty("There are no announcements available right now.")
+      ) : (
+        <div className="pc-announcements-list">
+          {announcements.map((announcement) => {
+            const id = getValue(announcement, "id", "Id");
+            const title =
+              getValue(announcement, "title", "Title") ||
+              "Untitled announcement";
+            const message = getValue(announcement, "message", "Message") || "";
+            const createdAt = getValue(announcement, "createdAt", "CreatedAt");
 
-      <div className="pc-parent-profile-grid">
-        <label>
-          First Name *
-          <input
-            name="firstName"
-            value={profile.firstName}
-            onChange={handleProfileChange}
-            disabled={!isEditingProfile}
-            required
-            maxLength={100}
-          />
-        </label>
+            return (
+              <article className="pc-announcement-card" key={id}>
+                <div className="pc-announcement-icon" aria-hidden="true">
+                  📣
+                </div>
 
-        <label>
-          Last Name *
-          <input
-            name="lastName"
-            value={profile.lastName}
-            onChange={handleProfileChange}
-            disabled={!isEditingProfile}
-            required
-            maxLength={100}
-          />
-        </label>
-
-        <label>
-          Email Address *
-          <input
-            type="email"
-            name="email"
-            value={profile.email}
-            onChange={handleProfileChange}
-            disabled={!isEditingProfile}
-            required
-            maxLength={254}
-          />
-        </label>
-
-        <label>
-          Phone Number
-          <input
-            type="tel"
-            name="phoneNumber"
-            value={profile.phoneNumber}
-            onChange={handleProfileChange}
-            disabled={!isEditingProfile}
-            maxLength={30}
-            placeholder="Enter your phone number"
-          />
-        </label>
-      </div>
-
-      {isEditingProfile && (
-        <div className="pc-edit-actions">
-          <button
-            type="button"
-            className="pc-button pc-button-secondary"
-            onClick={handleProfileCancel}
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            className="pc-button pc-button-primary"
-          >
-            Save Changes
-          </button>
+                <div className="pc-announcement-content">
+                  <h3>{title}</h3>
+                  <p className="pc-announcement-date">
+                    {formatDate(createdAt)}
+                  </p>
+                  <p className="pc-announcement-message">{message}</p>
+                </div>
+              </article>
+            );
+          })}
         </div>
       )}
-    </form>
-  </section>
-);
+    </section>
+  );
+
+  const loadComplaints = useCallback(async () => {
+    setComplaintsLoading(true);
+    setComplaintsError("");
+
+    try {
+      if (!token) {
+        throw new Error("Please log in to view your complaints.");
+      }
+
+      const data = await fetchApi("/Complaints/mine", token);
+      setComplaints(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setComplaints([]);
+      setComplaintsError(error.message || "Unable to load your complaints.");
+    } finally {
+      setComplaintsLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    loadComplaints();
+  }, [loadComplaints, refreshKey]);
+
+  const submitComplaint = async (event) => {
+    event.preventDefault();
+
+    if (!complaintSubject.trim() || !complaintDescription.trim()) {
+      setComplaintsError("Please enter a subject and description.");
+      return;
+    }
+
+    setComplaintSubmitting(true);
+    setComplaintsError("");
+    setComplaintSuccess("");
+
+    try {
+      await fetchApi("/Complaints", token, {
+        method: "POST",
+        body: JSON.stringify({
+          subject: complaintSubject.trim(),
+          description: complaintDescription.trim(),
+        }),
+      });
+
+      setComplaintSubject("");
+      setComplaintDescription("");
+      setComplaintSuccess("Your complaint was submitted successfully.");
+
+      await loadComplaints();
+    } catch (error) {
+      setComplaintsError(error.message || "Unable to submit your complaint.");
+    } finally {
+      setComplaintSubmitting(false);
+    }
+  };
+
+  const renderComplaints = () => (
+    <section className={styles.card}>
+      <h2 className={styles.sectionTitle}>Complaints & Feedback</h2>
+      <p className="pc-muted pc-section-description">
+        Share a concern with the daycare administration and follow its progress.
+      </p>
+
+      <form className="pc-complaint-form" onSubmit={submitComplaint}>
+        <label>
+          Subject
+          <input
+            value={complaintSubject}
+            onChange={(event) => setComplaintSubject(event.target.value)}
+            placeholder="Briefly describe your concern"
+            maxLength={200}
+            required
+          />
+        </label>
+
+        <label>
+          Description
+          <textarea
+            value={complaintDescription}
+            onChange={(event) => setComplaintDescription(event.target.value)}
+            placeholder="Explain your concern in detail..."
+            rows={5}
+            maxLength={5000}
+            required
+          />
+        </label>
+
+        {complaintsError && (
+          <p className="pc-error" role="alert">
+            {complaintsError}
+          </p>
+        )}
+
+        {complaintSuccess && (
+          <p className="pc-edit-success" role="status">
+            {complaintSuccess}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          className="pc-button pc-button-primary"
+          disabled={complaintSubmitting}
+        >
+          {complaintSubmitting ? "Submitting..." : "Submit Complaint"}
+        </button>
+      </form>
+
+      <div className="pc-complaints-history">
+        <h3 className={styles.sectionTitle}>My Submitted Complaints</h3>
+
+        {complaintsLoading
+          ? renderLoading("Loading your complaints...")
+          : complaintsError && complaints.length === 0
+            ? renderError(complaintsError, loadComplaints)
+            : complaints.length === 0
+              ? renderEmpty("You have not submitted any complaints yet.")
+              : complaints.map((complaint) => {
+                  const id = getValue(complaint, "id", "Id");
+                  const subject = getValue(complaint, "subject", "Subject");
+                  const description = getValue(
+                    complaint,
+                    "description",
+                    "Description",
+                  );
+                  const status =
+                    getValue(complaint, "status", "Status") || "Pending";
+                  const response = getValue(
+                    complaint,
+                    "adminResponse",
+                    "AdminResponse",
+                  );
+                  const createdAt = getValue(
+                    complaint,
+                    "createdAt",
+                    "CreatedAt",
+                  );
+
+                  return (
+                    <article className="pc-complaint-card" key={id}>
+                      <div className="pc-complaint-heading">
+                        <h4>{subject}</h4>
+                        <span
+                          className={`pc-complaint-status ${String(status)
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`}
+                        >
+                          {status}
+                        </span>
+                      </div>
+
+                      <p className="pc-complaint-date">
+                        Submitted: {formatDate(createdAt)}
+                      </p>
+                      <p>{description}</p>
+
+                      {response && (
+                        <div className="pc-complaint-response">
+                          <strong>Daycare response</strong>
+                          <p>{response}</p>
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
+      </div>
+    </section>
+  );
+
+  const handleProfileChange = (event) => {
+    const { name, value } = event.target;
+
+    setProfile((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleProfileCancel = () => {
+    const savedUser = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("authUser") || "{}");
+      } catch {
+        return {};
+      }
+    })();
+
+    setProfile({
+      firstName: savedUser.firstName || savedUser.FirstName || "",
+      lastName: savedUser.lastName || savedUser.LastName || "",
+      email: savedUser.email || savedUser.Email || "",
+      phoneNumber: savedUser.phoneNumber || savedUser.PhoneNumber || "",
+    });
+
+    setProfileMessage("");
+    setIsEditingProfile(false);
+  };
+
+  const handleProfileSave = (event) => {
+    event.preventDefault();
+
+    const firstName = profile.firstName.trim();
+    const lastName = profile.lastName.trim();
+    const email = profile.email.trim();
+    const phoneNumber = profile.phoneNumber.trim();
+
+    if (!firstName || !lastName || !email) {
+      setProfileMessage("First name, last name, and email are required.");
+      return;
+    }
+
+    try {
+      const savedUser = JSON.parse(localStorage.getItem("authUser") || "{}");
+
+      const updatedUser = {
+        ...savedUser,
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+      };
+
+      localStorage.setItem("authUser", JSON.stringify(updatedUser));
+
+      setProfile({
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+      });
+
+      setProfileMessage("Profile saved in this browser.");
+      setIsEditingProfile(false);
+      window.dispatchEvent(new Event("authChanged"));
+    } catch {
+      setProfileMessage("Unable to save your profile. Please try again.");
+    }
+  };
+
+  const renderProfile = () => (
+    <section className="pc-card pc-profile-page">
+      <div className="pc-card-heading">
+        <div>
+          <h2 className={styles.sectionTitle}>My Profile</h2>
+          <p className="pc-muted">View and manage your personal information.</p>
+        </div>
+
+        {!isEditingProfile && (
+          <button
+            type="button"
+            className="pc-button pc-button-primary"
+            onClick={() => {
+              setProfileMessage("");
+              setIsEditingProfile(true);
+            }}
+          >
+            Edit Profile
+          </button>
+        )}
+      </div>
+
+      <div className="pc-parent-profile-banner">
+        <div className="pc-parent-profile-avatar">
+          {profile.firstName.charAt(0).toUpperCase() || "P"}
+        </div>
+
+        <div>
+          <h2>
+            {profile.firstName} {profile.lastName}
+          </h2>
+          <p>Parent Account</p>
+        </div>
+      </div>
+
+      {profileMessage && (
+        <p className="pc-edit-success" role="status">
+          {profileMessage}
+        </p>
+      )}
+
+      <form onSubmit={handleProfileSave}>
+        <h3 className={styles.sectionTitle}>Personal Information</h3>
+
+        <div className="pc-parent-profile-grid">
+          <label>
+            First Name *
+            <input
+              name="firstName"
+              value={profile.firstName}
+              onChange={handleProfileChange}
+              disabled={!isEditingProfile}
+              required
+              maxLength={100}
+            />
+          </label>
+
+          <label>
+            Last Name *
+            <input
+              name="lastName"
+              value={profile.lastName}
+              onChange={handleProfileChange}
+              disabled={!isEditingProfile}
+              required
+              maxLength={100}
+            />
+          </label>
+
+          <label>
+            Email Address *
+            <input
+              type="email"
+              name="email"
+              value={profile.email}
+              onChange={handleProfileChange}
+              disabled={!isEditingProfile}
+              required
+              maxLength={254}
+            />
+          </label>
+
+          <label>
+            Phone Number
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={profile.phoneNumber}
+              onChange={handleProfileChange}
+              disabled={!isEditingProfile}
+              maxLength={30}
+              placeholder="Enter your phone number"
+            />
+          </label>
+        </div>
+
+        {isEditingProfile && (
+          <div className="pc-edit-actions">
+            <button
+              type="button"
+              className="pc-button pc-button-secondary"
+              onClick={handleProfileCancel}
+            >
+              Cancel
+            </button>
+
+            <button type="submit" className="pc-button pc-button-primary">
+              Save Changes
+            </button>
+          </div>
+        )}
+      </form>
+    </section>
+  );
 
   const pageContent = {
     overview: renderOverview,
@@ -1674,7 +1636,7 @@ const renderProfile = () => (
     meals: renderMeals,
     attendance: renderAttendance,
     announcements: renderAnnouncements,
-  complaints: renderComplaints,
+    complaints: renderComplaints,
     profile: renderProfile,
     payments: renderPayments,
   };
@@ -1682,35 +1644,36 @@ const renderProfile = () => (
   return (
     <div className="pc-app">
       <aside className="pc-sidebar">
-        <div className="pc-brand">♡ Cuddle Care</div>
+        <div className="side-header-left">
+          <Heart size={30} />
+          <h2>
+            Cuddle <span>Care</span>
+          </h2>
+        </div>
         <div className="pc-brand-subtitle">Parent Portal</div>
 
-        <p className="pc-nav-label">MENU</p>
+        <nav className="pc-navigation" aria-label="Parent dashboard navigation">
+          {navItems.map((item) => {
+            const isActive = activePage === item.id;
+            const Icon = item.icon;
 
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActivePage(item.id)}
+                aria-current={isActive ? "page" : undefined}
+                className={`pc-nav-item ${isActive ? "active" : ""}`}
+              >
+                <span className="pc-nav-icon" aria-hidden="true">
+                  <Icon size={20} strokeWidth={1.8} />
+                </span>
 
-<nav className="pc-navigation" aria-label="Parent dashboard navigation">
-  {navItems.map((item) => {
-    const isActive = activePage === item.id;
-    const Icon = item.icon;
-
-    return (
-      <button
-        key={item.id}
-        type="button"
-        onClick={() => setActivePage(item.id)}
-        aria-current={isActive ? "page" : undefined}
-        className={`pc-nav-item ${isActive ? "active" : ""}`}
-      >
-        <span className="pc-nav-icon" aria-hidden="true">
-          <Icon size={20} strokeWidth={1.8} />
-        </span>
-
-        <span>{item.label}</span>
-      </button>
-    );
-  })}
-</nav>
-
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
 
         <div className="pc-sidebar-spacer" />
 
@@ -1739,17 +1702,17 @@ const renderProfile = () => (
 
           <div className="pc-profile">
             <button
-  type="button"
-  className="pc-profile-avatar pc-profile-avatar-button"
-  onClick={() => {
-    setProfileMessage("");
-    setActivePage("profile");
-  }}
-  aria-label="Open My Profile"
-  title="My Profile"
->
-  {parentName.charAt(0).toUpperCase()}
-</button>
+              type="button"
+              className="pc-profile-avatar pc-profile-avatar-button"
+              onClick={() => {
+                setProfileMessage("");
+                setActivePage("profile");
+              }}
+              aria-label="Open My Profile"
+              title="My Profile"
+            >
+              {parentName.charAt(0).toUpperCase()}
+            </button>
             <div>
               <p className="pc-profile-name">{parentName}</p>
               <p className="pc-profile-role">Parent account</p>
